@@ -1,0 +1,35 @@
+{
+  "name": "legacydirect",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "dev:vinext": "vite dev --port 3001",
+    "build:vinext": "vite build",
+    "start:vinext": "vite preview",
+    "deploy:vinext": "vinext-cloudflare deploy --warm-cache",
+    "deploy:response-store": "cf deploy --prebuilt --mode production --worker legacydirect-response-store"
+  },
+  "dependencies": {
+    "@cloudflare/workers-response-store": "^1.0.1",
+    "@vinext/cloudflare": "^1.0.1",
+    "next": "^16.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-server-dom-webpack": "^19.3.0",
+    "vinext": "^1.0.1"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "^2.0.0-beta.sha-52b0dc0e9",
+    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-rsc": "^0.5.35",
+    "cf": "^1.0.0-beta.12",
+    "vite": "^8.3.0"
+  }
+}
