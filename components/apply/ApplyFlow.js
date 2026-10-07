@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import ApplyHeader from './ApplyHeader';
 import ProgressTrack from './ProgressTrack';
 import SummaryPanel from './SummaryPanel';
 import IntroScreen from './IntroScreen';
 import GateScreen from './GateScreen';
+import FitScreen from './FitScreen';
 import ContactScreen from './ContactScreen';
 import ReviewScreen from './ReviewScreen';
 import DoneScreen from './DoneScreen';
-import { QUESTION_STEPS } from './quizConfig';
+import { visibleSteps } from './quizConfig';
 
 const INITIAL_DATA = {
   coverageFor: null,
@@ -20,7 +21,12 @@ const INITIAL_DATA = {
   subjectLastName: '',
   yourEmail: '',
   wantsPreviewReminder: false,
-  goal: null,
+  goals: [],
+  trigger: null,
+  dependents: [],
+  childrenCount: null,
+  mortgage: 0,
+  mortgageTouched: false,
   state: '',
   dobMonth: '',
   dobDay: '',
@@ -29,43 +35,97 @@ const INITIAL_DATA = {
   heightFeet: 5,
   heightInches: 10,
   weightLbs: 170,
+  tobacco: null,
+  citizenship: null,
+  budget: null,
+  timing: null,
   mobile: '',
   wantsEmailUpdates: false,
   wantsTexts: false,
 };
 
+// How long a picked answer stays highlighted before auto-advancing.
+const AUTO_ADVANCE_MS = 220;
+
 export default function ApplyFlow() {
-  const [stage, setStage] = useState('intro'); // intro | gate | question | contact | review | done
-  const [stepIndex, setStepIndex] = useState(0);
+  const [stage, setStage] = useState('intro'); // intro | gate | question | fit | contact | review | done
+  const [stepId, setStepId] = useState(null);
   const [data, setData] = useState(INITIAL_DATA);
+  const advancing = useRef(false);
 
   const update = (patch) => setData((d) => ({ ...d, ...patch }));
 
-  function handleStartOver() {
-    setData(INITIAL_DATA);
-    setStepIndex(0);
-    setStage('intro');
+  const steps = visibleSteps(data);
+  const stepIndex = Math.max(0, steps.findIndex((s) => s.id === stepId));
+  const current = steps[stepIndex];
+
+  function scrollTop() {
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function handleQuestionContinue() {
-    const current = QUESTION_STEPS[stepIndex];
-    if (!current.isValid(data)) return;
-    if (stepIndex < QUESTION_STEPS.length - 1) {
-      setStepIndex((i) => i + 1);
+  // Moves forward using the given data snapshot, so a just-picked answer
+  // (which may show or hide later questions) is accounted for immediately.
+  function goNext(nextData) {
+    const list = visibleSteps(nextData);
+    const i = list.findIndex((s) => s.id === current.id);
+    if (i < list.length - 1) {
+      setStepId(list[i + 1].id);
     } else {
-      setStage('contact');
+      setStage('fit');
     }
+    scrollTop();
   }
 
-  function handleQuestionBack() {
+  function handleContinue() {
+    if (!current.isValid(data)) return;
+    const nextData = current.onLeave ? { ...data, ...current.onLeave } : data;
+    if (current.onLeave) setData(nextData);
+    goNext(nextData);
+  }
+
+  function handleChoose(patch) {
+    if (advancing.current) return; // ignore double-taps while moving on
+    advancing.current = true;
+    const nextData = { ...data, ...patch };
+    setData(nextData);
+    setTimeout(() => {
+      advancing.current = false;
+      goNext(nextData);
+    }, AUTO_ADVANCE_MS);
+  }
+
+  function handleBack() {
     if (stepIndex > 0) {
-      setStepIndex((i) => i - 1);
+      setStepId(steps[stepIndex - 1].id);
     } else {
       setStage('gate');
     }
+    scrollTop();
+  }
+
+  function goToFirstQuestion() {
+    setStepId(steps[0].id);
+    setStage('question');
+    scrollTop();
+  }
+
+  function goToLastQuestion() {
+    setStepId(steps[steps.length - 1].id);
+    setStage('question');
+    scrollTop();
+  }
+
+  function handleStartOver() {
+    setData(INITIAL_DATA);
+    setStepId(null);
+    setStage('intro');
   }
 
   const showSummary = stage === 'question' || stage === 'contact';
+  const valid = current ? current.isValid(data) : false;
+  // Single-pick questions advance on tap; the Continue button only appears
+  // there once the question already has an answer (e.g. after going Back).
+  const showContinue = current && (!current.auto || valid);
 
   return (
     <div className="apply-page">
@@ -74,9 +134,7 @@ export default function ApplyFlow() {
       <main className="apply-main">
         <div className={`apply-layout ${showSummary ? 'apply-layout-with-summary' : ''}`}>
           <div className="apply-content">
-            {stage === 'question' && (
-              <ProgressTrack total={QUESTION_STEPS.length} current={stepIndex} />
-            )}
+            {stage === 'question' && <ProgressTrack total={steps.length} current={stepIndex} />}
 
             {stage === 'intro' && <IntroScreen onBegin={() => setStage('gate')} />}
 
@@ -85,45 +143,42 @@ export default function ApplyFlow() {
                 data={data}
                 update={update}
                 onBack={() => setStage('intro')}
-                onContinue={() => {
-                  setStepIndex(0);
-                  setStage('question');
-                }}
+                onContinue={goToFirstQuestion}
               />
             )}
 
-            {stage === 'question' &&
-              (() => {
-                const StepComponent = QUESTION_STEPS[stepIndex].Component;
-                const valid = QUESTION_STEPS[stepIndex].isValid(data);
-                return (
-                  <div className="apply-question-wrap">
-                    <StepComponent data={data} update={update} />
-                    <div className="apply-nav">
-                      <button type="button" className="apply-nav-back" onClick={handleQuestionBack}>
-                        Back
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-brass"
-                        disabled={!valid}
-                        onClick={handleQuestionContinue}
-                      >
-                        Continue
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
+            {stage === 'question' && current && (
+              <div className="apply-question-wrap" key={current.id}>
+                <current.Component data={data} update={update} onChoose={handleChoose} />
+                <div className="apply-nav">
+                  <button type="button" className="apply-nav-back" onClick={handleBack}>
+                    Back
+                  </button>
+                  {showContinue && (
+                    <button type="button" className="btn btn-brass" disabled={!valid} onClick={handleContinue}>
+                      Continue
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {stage === 'fit' && (
+              <FitScreen
+                data={data}
+                onBack={goToLastQuestion}
+                onContinue={() => {
+                  setStage('contact');
+                  scrollTop();
+                }}
+              />
+            )}
 
             {stage === 'contact' && (
               <ContactScreen
                 data={data}
                 update={update}
-                onBack={() => {
-                  setStepIndex(QUESTION_STEPS.length - 1);
-                  setStage('question');
-                }}
+                onBack={() => setStage('fit')}
                 onEdit={() => setStage('gate')}
                 onContinue={() => setStage('review')}
               />
@@ -133,10 +188,7 @@ export default function ApplyFlow() {
               <ReviewScreen
                 data={data}
                 onBack={() => setStage('contact')}
-                onEditAnswers={() => {
-                  setStepIndex(0);
-                  setStage('question');
-                }}
+                onEditAnswers={goToFirstQuestion}
                 onContinue={() => setStage('done')}
               />
             )}

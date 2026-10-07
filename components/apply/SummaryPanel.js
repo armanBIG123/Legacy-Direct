@@ -1,21 +1,14 @@
 'use client';
 
-import { suggestedPlanName, formatDob, formatHeightWeight, goalLabel, sexLabel } from './planSuggestion';
+import { suggestedPlanName, answerRows } from './planSuggestion';
 
 // A running recap of what's been answered so far, styled after the
-// "Policy Preview" card on the homepage. Amerikin's own flow never showed
-// visitors a summary of what they'd already told it — this keeps the
-// quiz transparent instead of asking people to just remember their answers.
+// "Policy Preview" card on the homepage. Competitor flows never show
+// visitors what they've already told them — this keeps the quiz transparent.
 export default function SummaryPanel({ data }) {
-  const rows = [
-    { label: 'Goal', value: goalLabel(data.goal) },
-    { label: 'State', value: data.state || null },
-    { label: 'Date of birth', value: formatDob(data) },
-    { label: 'Sex on application', value: sexLabel(data.sex) },
-    { label: 'Height & weight', value: formatHeightWeight(data) },
-  ].filter((r) => r.value);
+  const rows = answerRows(data).filter((r) => r.value);
 
-  const planName = suggestedPlanName(data.goal);
+  const planName = suggestedPlanName(data);
   const subjectName = data.subjectFirstName
     ? `${data.subjectFirstName} ${data.subjectLastName || ''}`.trim()
     : null;

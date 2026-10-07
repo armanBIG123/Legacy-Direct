@@ -60,7 +60,7 @@ export default function DobStep({ data, update }) {
       </div>
       {dobOutOfRange(data) && (
         <p className="apply-field-note apply-field-note-warn">
-          Most LegacyDirect plans cover applicants between 18 and 85 years old.
+          LegacyDirect plans are available through age 80. An advisor can still talk through options.
         </p>
       )}
     </div>
@@ -73,7 +73,7 @@ function dobOutOfRange(data) {
   if (Number.isNaN(dob.getTime())) return false;
   const ageMs = Date.now() - dob.getTime();
   const age = ageMs / (1000 * 60 * 60 * 24 * 365.25);
-  return age < 18 || age > 85;
+  return age > 80;
 }
 
 export function dobIsValid(data) {

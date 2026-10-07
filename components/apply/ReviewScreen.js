@@ -1,22 +1,15 @@
 'use client';
 
-import { suggestedPlanName, formatDob, formatHeightWeight, goalLabel, sexLabel } from './planSuggestion';
+import { suggestedPlanName, answerRows } from './planSuggestion';
 
 export default function ReviewScreen({ data, onContinue, onBack, onEditAnswers }) {
   const isMe = data.coverageFor === 'me';
   const subjectName = isMe
     ? `${data.applicantFirstName} ${data.applicantLastName}`.trim()
     : `${data.subjectFirstName} ${data.subjectLastName}`.trim();
-  const planName = suggestedPlanName(data.goal);
+  const planName = suggestedPlanName(data);
 
-  const rows = [
-    { label: 'Goal', value: goalLabel(data.goal) },
-    { label: 'State', value: data.state },
-    { label: 'Date of birth', value: formatDob(data) },
-    { label: 'Sex on application', value: sexLabel(data.sex) },
-    { label: 'Height & weight', value: formatHeightWeight(data) },
-    { label: 'Mobile', value: data.mobile || 'Not provided' },
-  ];
+  const rows = [...answerRows(data), { label: 'Mobile', value: data.mobile || 'Not provided' }];
 
   return (
     <div className="apply-bookend apply-bookend-wide">

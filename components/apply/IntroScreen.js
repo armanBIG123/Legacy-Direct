@@ -7,8 +7,9 @@ export default function IntroScreen({ onBegin }) {
     <div className="apply-bookend">
       <h1>Let&rsquo;s shape your plan.</h1>
       <p className="apply-bookend-lede">
-        {QUESTION_STEPS.length} quick questions, about three minutes. No health forms yet —
-        just enough to see what coverage could look like.
+        About {QUESTION_STEPS.filter((s) => !s.when).length} quick questions, around four
+        minutes. Most are one tap. No Social Security number and no health forms — just enough
+        to match you with the right plan.
       </p>
       <p className="apply-bookend-fine">
         LegacyDirect helps you build and submit a plan. LegacyDirect is not the insurance
