@@ -35,6 +35,7 @@ const INITIAL_DATA = {
   heightFeet: 5,
   heightInches: 10,
   weightLbs: 170,
+  hwTouched: false,
   tobacco: null,
   citizenship: null,
   budget: null,

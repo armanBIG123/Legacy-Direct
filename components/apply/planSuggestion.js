@@ -180,7 +180,7 @@ export function answerRows(data) {
     { label: 'State', value: data.state || null },
     { label: 'Date of birth', value: formatDob(data) },
     { label: 'Sex on application', value: sexLabel(data.sex) },
-    { label: 'Height & weight', value: formatHeightWeight(data) },
+    { label: 'Height & weight', value: data.hwTouched ? formatHeightWeight(data) : null },
     { label: 'Tobacco', value: LABELS.tobacco[data.tobacco] || null },
     { label: 'Residency', value: LABELS.citizenship[data.citizenship] || null },
     { label: 'Monthly budget', value: LABELS.budget[data.budget] || null },

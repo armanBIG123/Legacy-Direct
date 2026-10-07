@@ -113,7 +113,7 @@ export const QUESTION_STEPS = [
   { id: 'state', Component: StateStep, isValid: stateIsValid },
   { id: 'dob', Component: DobStep, isValid: dobIsValid },
   { id: 'sex', Component: SexStep, isValid: sexIsValid },
-  { id: 'heightWeight', Component: HeightWeightStep, isValid: heightWeightIsValid },
+  { id: 'heightWeight', Component: HeightWeightStep, isValid: heightWeightIsValid, onLeave: { hwTouched: true } },
   choice('tobacco', {
     eyebrow: 'Health basics',
     title: (d) => `When did ${who(d).subj} last use tobacco or nicotine?`,

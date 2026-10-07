@@ -18,7 +18,7 @@ export default function Header() {
   return (
     <header className={scrolled ? 'scrolled' : ''}>
       <div className="container nav-wrap">
-        <a href="#start" className="logo" onClick={closeMenu}>
+        <a href="/" className="logo" onClick={closeMenu}>
           <svg width="30" height="26" viewBox="0 0 30 26" fill="none">
             <path d="M2 21H18" stroke="#241134" strokeWidth="1.4" strokeDasharray="3 3" />
             <circle cx="24" cy="21" r="3.4" fill="#241134" />
@@ -33,10 +33,10 @@ export default function Header() {
         <div className={`nav-links ${open ? 'open' : ''}`}>
           <nav>
             <ul>
-              <li><a href="#how" onClick={closeMenu}>How it works</a></li>
-              <li><a href="#families" onClick={closeMenu}>Who it&apos;s for</a></li>
-              <li><a href="#values" onClick={closeMenu}>Our approach</a></li>
-              <li><a href="#history" onClick={closeMenu}>Track record</a></li>
+              <li><a href="/#how" onClick={closeMenu}>How it works</a></li>
+              <li><a href="/#families" onClick={closeMenu}>Who it&apos;s for</a></li>
+              <li><a href="/#values" onClick={closeMenu}>Our approach</a></li>
+              <li><a href="/#history" onClick={closeMenu}>Track record</a></li>
             </ul>
           </nav>
           <div className="nav-cta">

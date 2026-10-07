@@ -1,6 +1,7 @@
 import '../apply/apply.css';
 import './data-use.css';
 import Link from 'next/link';
+import ApplyHeader from '@/components/apply/ApplyHeader';
 
 export const metadata = {
   title: 'How application information is used — LegacyDirect',
@@ -9,15 +10,7 @@ export const metadata = {
 export default function DataUsePage() {
   return (
     <div className="apply-page">
-      <header className="apply-header">
-        <div className="apply-header-inner">
-          <Link href="/" className="apply-logo">
-            <span className="apply-logo-word">
-              Legacy<b>Direct</b>
-            </span>
-          </Link>
-        </div>
-      </header>
+      <ApplyHeader />
 
       <main className="apply-main">
         <div className="data-use-layout">

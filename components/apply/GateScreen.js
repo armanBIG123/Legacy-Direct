@@ -37,20 +37,36 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
         Pick one, then add a name and email so you can pick this back up if you step away.
       </p>
 
-      <div className="apply-card-grid apply-card-grid-2">
+      <div className="apply-card-grid apply-card-grid-2 apply-gate-cards">
         <button
           type="button"
-          className={`apply-option-card apply-option-card-compact ${isMe ? 'is-selected' : ''}`}
+          className={`apply-option-card ${isMe ? 'is-selected' : ''}`}
+          aria-pressed={isMe}
           onClick={() => update({ coverageFor: 'me' })}
         >
+          <span className="apply-gate-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="11" cy="7" r="4" />
+              <path d="M3 20c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+            </svg>
+          </span>
           <span className="apply-option-title">Me</span>
           <span className="apply-option-body">I want coverage for myself</span>
         </button>
         <button
           type="button"
-          className={`apply-option-card apply-option-card-compact ${isSomeoneElse ? 'is-selected' : ''}`}
+          className={`apply-option-card ${isSomeoneElse ? 'is-selected' : ''}`}
+          aria-pressed={isSomeoneElse}
           onClick={() => update({ coverageFor: 'someone-else' })}
         >
+          <span className="apply-gate-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="8" cy="7" r="3.4" />
+              <path d="M1.5 19c0-3.8 2.9-6 6.5-6s6.5 2.2 6.5 6" />
+              <circle cx="16" cy="8.5" r="2.6" />
+              <path d="M15 13.2c3.3-.4 5.5 1.6 5.5 4.8" />
+            </svg>
+          </span>
           <span className="apply-option-title">Someone else</span>
           <span className="apply-option-body">I&rsquo;m helping a family member or friend</span>
         </button>
