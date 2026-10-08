@@ -1,4 +1,4 @@
-import { SUPABASE_URL, SUPABASE_ANON_KEY, leadsConfigured } from './leadConfig';
+import { SUPABASE_ANON_KEY, SUBMIT_URL, leadsConfigured } from './leadConfig';
 import { recommendPlan } from './planSuggestion';
 
 // Exact wording shown next to the text-message checkbox. Stored with each
@@ -53,39 +53,46 @@ export function buildLeadRow(data) {
   };
 }
 
-// Sends the lead. Resolves on success; throws an Error with a friendly
-// message otherwise. Uses Supabase's REST endpoint directly, so the site
-// needs no extra packages.
-export async function submitLead(data) {
+// Sends the lead through the submit-lead server function, along with the
+// Cloudflare Turnstile token proving a real person filled it out.
+// Resolves on success; throws an Error with a friendly message otherwise.
+export async function submitLead(data, turnstileToken) {
   // Honeypot: real people never see or fill this field; bots often do.
   if (data.website) return;
 
   if (!leadsConfigured) {
     throw new Error('Submissions aren’t connected yet. Please call or email us and we’ll take it from here.');
   }
+  if (!turnstileToken) {
+    throw new Error('Still running a quick security check — give it a second and try again.');
+  }
 
   let res;
   try {
-    res = await fetch(`${SUPABASE_URL}/rest/v1/leads`, {
+    res = await fetch(SUBMIT_URL, {
       method: 'POST',
       headers: {
         apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
       },
-      body: JSON.stringify(buildLeadRow(data)),
+      body: JSON.stringify({ token: turnstileToken, lead: buildLeadRow(data) }),
     });
   } catch {
     throw new Error('We couldn’t reach our server. Check your connection and try again.');
   }
 
-  if (!res.ok) {
-    let detail = '';
-    try {
-      detail = (await res.json()).message || '';
-    } catch {}
-    if (typeof console !== 'undefined') console.error('Lead submit failed', res.status, detail);
-    throw new Error('Something went wrong sending your information. Please try again in a moment.');
+  if (res.ok) return;
+
+  let code = '';
+  try {
+    code = (await res.json()).error || '';
+  } catch {}
+  if (typeof console !== 'undefined') console.error('Lead submit failed', res.status, code);
+  if (code === 'verification_failed') {
+    throw new Error('Our security check didn’t go through. Please try again.');
   }
+  if (code === 'invalid_lead') {
+    throw new Error('Something in your answers didn’t look right. Check your email address and try again.');
+  }
+  throw new Error('Something went wrong sending your information. Please try again in a moment.');
 }

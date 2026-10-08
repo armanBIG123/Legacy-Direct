@@ -57,6 +57,8 @@ export default function ApplyFlow() {
   const advancing = useRef(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   const update = (patch) => setData((d) => ({ ...d, ...patch }));
 
@@ -125,11 +127,14 @@ export default function ApplyFlow() {
     setSubmitting(true);
     setSubmitError('');
     try {
-      await submitLead(data);
+      await submitLead(data, turnstileToken);
       setStage('done');
       scrollTop();
     } catch (err) {
       setSubmitError(err.message);
+      // Turnstile tokens are single-use: get a fresh one for the retry.
+      setTurnstileToken('');
+      setTurnstileKey((k) => k + 1);
     } finally {
       setSubmitting(false);
     }
@@ -212,6 +217,9 @@ export default function ApplyFlow() {
                 onContinue={handleSubmit}
                 submitting={submitting}
                 error={submitError}
+                turnstileKey={turnstileKey}
+                turnstileToken={turnstileToken}
+                onTurnstileToken={setTurnstileToken}
               />
             )}
 
