@@ -62,3 +62,7 @@ create policy "website can submit leads"
 
 revoke all on public.leads from anon;
 grant insert on public.leads to anon;
+
+-- The server-side functions (submit-lead, notify-new-lead) act as
+-- service_role. Needed when "Automatically expose new tables" is off.
+grant select, insert, update, delete on public.leads to service_role;

@@ -1,4 +1,8 @@
 // submit-lead — the only way a lead gets into the database.
+// Handles both product lines:
+//   kind = 'iul'  (default) → public.leads        (full IUL quiz)
+//   kind = 'term'           → public.term_leads   (short term quiz; may be
+//                              partial when someone taps "Call" mid-form)
 //
 // 1. Confirms with Cloudflare Turnstile that a real person submitted it.
 // 2. Keeps only the fields the website is allowed to set.
@@ -28,6 +32,15 @@ const ALLOWED_FIELDS = [
   'consent_reminder_email', 'consent_updates_email', 'consent_texts', 'consent_text_wording',
   'source_url',
 ];
+
+const TERM_FIELDS = [
+  'completed', 'call_clicked_at', 'last_step',
+  'coverage_need', 'annual_income', 'mortgage_balance', 'suggested_coverage',
+  'first_name', 'last_name', 'date_of_birth', 'zip', 'tobacco_last_2_years', 'email', 'phone',
+  'consent_texts', 'consent_text_wording', 'source_url',
+];
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function cors(origin: string | null) {
   const allowed = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
@@ -80,15 +93,6 @@ Deno.serve(async (req) => {
     return reply(origin, 403, { error: 'verification_failed' });
   }
 
-  // 2. Keep only allowed fields.
-  const lead: Record<string, unknown> = {};
-  for (const key of ALLOWED_FIELDS) if (key in input) lead[key] = input[key];
-  lead.user_agent = (req.headers.get('user-agent') ?? '').slice(0, 500);
-
-  const email = typeof lead.contact_email === 'string' ? lead.contact_email.trim().toLowerCase() : '';
-  if (!email) return reply(origin, 400, { error: 'bad_request' });
-  lead.contact_email = email;
-
   const rest = (path: string, init: RequestInit = {}) =>
     fetch(`${supabaseUrl}/rest/v1/${path}`, {
       ...init,
@@ -99,6 +103,39 @@ Deno.serve(async (req) => {
         ...(init.headers ?? {}),
       },
     });
+
+  // ---------- TERM: create or update this visit's row ----------
+  if (body?.kind === 'term') {
+    const sessionId = String(body?.session_id ?? '');
+    if (!UUID_RE.test(sessionId)) return reply(origin, 400, { error: 'bad_request' });
+
+    const row: Record<string, unknown> = { session_id: sessionId };
+    for (const key of TERM_FIELDS) if (key in input) row[key] = input[key];
+    if (typeof row.email === 'string') row.email = row.email.trim().toLowerCase() || null;
+    row.user_agent = (req.headers.get('user-agent') ?? '').slice(0, 500);
+
+    const up = await rest('term_leads?on_conflict=session_id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify(row),
+    });
+    if (!up.ok) {
+      const detail = await up.text();
+      console.error('Term upsert failed', up.status, detail);
+      return reply(origin, up.status === 400 ? 400 : 500, { error: up.status === 400 ? 'invalid_lead' : 'save_failed' });
+    }
+    return reply(origin, 200, { ok: true });
+  }
+
+  // ---------- IUL ----------
+  // 2. Keep only allowed fields.
+  const lead: Record<string, unknown> = {};
+  for (const key of ALLOWED_FIELDS) if (key in input) lead[key] = input[key];
+  lead.user_agent = (req.headers.get('user-agent') ?? '').slice(0, 500);
+
+  const email = typeof lead.contact_email === 'string' ? lead.contact_email.trim().toLowerCase() : '';
+  if (!email) return reply(origin, 400, { error: 'bad_request' });
+  lead.contact_email = email;
 
   // 3. Same person double-submitting? Treat it as already received.
   // Matches on email AND the insured's name, so one family member can still

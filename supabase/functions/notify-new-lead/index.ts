@@ -1,6 +1,10 @@
 // notify-new-lead — emails the team whenever a new lead lands.
 //
-// Triggered by a Supabase Database Webhook (INSERT on public.leads).
+// Triggered by Supabase Database Webhooks:
+//   - INSERT on public.leads            (IUL quiz)
+//   - INSERT and UPDATE on public.term_leads (term quiz / call button)
+//     → emails when a term lead first appears, when it's completed, and
+//       when the person taps "Call".
 // Sends through Resend (resend.com). Required secrets, set in Supabase →
 // Edge Functions → Secrets:
 //   RESEND_API_KEY   your Resend API key
@@ -37,6 +41,66 @@ function heightText(inches: number | null) {
   return inches ? `${Math.floor(inches / 12)}'${inches % 12}"` : '—';
 }
 
+
+const NEED_LABEL: Record<string, string> = {
+  living: 'Living benefits / income replacement',
+  temporary: 'Temporary coverage (10× income)',
+  mortgage: 'Mortgage protection',
+};
+const money = (n: unknown) => (n === null || n === undefined || n === '' ? '—' : `$${Number(n).toLocaleString('en-US')}`);
+
+function termEmail(lead: Record<string, any>, reason: string) {
+  const name = `${lead.first_name ?? ''} ${lead.last_name ?? ''}`.trim() || 'Name not given yet';
+  const rows: [string, string][] = [
+    ['Why you got this', reason],
+    ['Phone', lead.phone || '—'],
+    ['Email', lead.email || '—'],
+    ['Coverage need', NEED_LABEL[lead.coverage_need] ?? '—'],
+    ['Annual income', money(lead.annual_income)],
+    ['Mortgage balance', money(lead.mortgage_balance)],
+    ['Starting coverage', money(lead.suggested_coverage)],
+    ['Tobacco (last 2 yrs)', lead.tobacco_last_2_years === true ? 'Yes' : lead.tobacco_last_2_years === false ? 'No' : '—'],
+    ['Date of birth', lead.date_of_birth || '—'],
+    ['ZIP', lead.zip || '—'],
+    ['Form completed', lead.completed ? 'Yes' : `No — stopped at "${lead.last_step ?? 'start'}"`],
+    ['Tapped Call', lead.call_clicked_at ? 'Yes' : 'No'],
+    ['OK to text', lead.consent_texts ? 'Yes (consent recorded)' : 'No'],
+  ];
+  const tag = reason.includes('Call') ? 'CALLING NOW' : 'Completed form';
+  return {
+    subject: `Term lead (${tag}): ${name} · ${NEED_LABEL[lead.coverage_need] ?? 'Term'}`,
+    reply_to: lead.email || undefined,
+    html: `
+    <div style="font-family:Arial,sans-serif;max-width:560px;color:#23172E">
+      <h2 style="margin:0 0 4px">Term lead: ${esc(name)}</h2>
+      <p style="margin:0 0 16px;color:#665A70">${esc(new Date(lead.updated_at ?? lead.created_at).toLocaleString('en-US', { timeZone: 'America/Chicago' }))} CT</p>
+      <table style="border-collapse:collapse;width:100%;font-size:14px">
+        ${rows.map(([k, v]) => `<tr><td style="padding:7px 10px;border-bottom:1px solid #eee;color:#665A70;width:40%">${esc(k)}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:600">${esc(v)}</td></tr>`).join('')}
+      </table>
+      <p style="font-size:12px;color:#665A70;margin-top:16px">Lead ID ${esc(lead.id)}. Contains personal information — don't forward outside the team.</p>
+    </div>`,
+  };
+}
+
+// Decide whether a term_leads change deserves an email, and why.
+function termReason(type: string, rec: Record<string, any>, old: Record<string, any> | null): string | null {
+  if (type === 'INSERT') return rec.call_clicked_at ? 'Tapped Call for live help' : rec.completed ? 'Completed the term quiz' : null;
+  if (type === 'UPDATE' && old) {
+    if (rec.call_clicked_at && !old.call_clicked_at) return 'Tapped Call for live help';
+    if (rec.completed && !old.completed) return 'Completed the term quiz';
+  }
+  return null;
+}
+
+async function sendEmail(subject: string, html: string, replyTo?: string) {
+  const to = (Deno.env.get('ALERT_EMAILS') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  return fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${Deno.env.get('RESEND_API_KEY')}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: Deno.env.get('FROM_EMAIL'), to, reply_to: replyTo, subject, html }),
+  });
+}
+
 Deno.serve(async (req) => {
   const secret = Deno.env.get('WEBHOOK_SECRET');
   if (!secret || req.headers.get('x-webhook-secret') !== secret) {
@@ -45,7 +109,21 @@ Deno.serve(async (req) => {
 
   const payload = await req.json().catch(() => null);
   const lead = payload?.record;
-  if (!lead || payload?.type !== 'INSERT') return new Response('ignored', { status: 200 });
+  if (!lead) return new Response('ignored', { status: 200 });
+
+  if (payload?.table === 'term_leads') {
+    const reason = termReason(payload.type, lead, payload.old_record ?? null);
+    if (!reason) return new Response('no email needed', { status: 200 });
+    const msg = termEmail(lead, reason);
+    const r = await sendEmail(msg.subject, msg.html, msg.reply_to);
+    if (!r.ok) {
+      console.error('Resend error', r.status, await r.text());
+      return new Response('email failed', { status: 502 });
+    }
+    return new Response('sent', { status: 200 });
+  }
+
+  if (payload?.type !== 'INSERT') return new Response('ignored', { status: 200 });
 
   const name = `${lead.insured_first_name ?? ''} ${lead.insured_last_name ?? ''}`.trim();
   const rows: [string, string][] = [

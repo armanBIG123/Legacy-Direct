@@ -34,6 +34,7 @@ export default function Header() {
           <nav>
             <ul>
               <li><a href="/#how" onClick={closeMenu}>How it works</a></li>
+              <li><a href="/term" onClick={closeMenu}>Term coverage</a></li>
               <li><a href="/#families" onClick={closeMenu}>Who it&apos;s for</a></li>
               <li><a href="/#values" onClick={closeMenu}>Our approach</a></li>
               <li><a href="/#history" onClick={closeMenu}>Track record</a></li>

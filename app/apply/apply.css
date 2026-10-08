@@ -514,6 +514,9 @@
 
 /* ---------- Footer ---------- */
 .apply-footer {
+  /* override the homepage's dark site footer style */
+  background: transparent;
+  color: var(--muted);
   border-top: 1px solid var(--rule);
   padding: 22px 24px;
 }
