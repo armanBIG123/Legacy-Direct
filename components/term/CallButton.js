@@ -1,6 +1,7 @@
 'use client';
 
 import { AGENT_PHONE_DISPLAY, AGENT_PHONE_TEL } from './termConfig';
+import { trackEvent } from './track';
 
 const PhoneIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -22,6 +23,7 @@ export default function CallButton({ onCall, variant = 'solid', label = 'Call fo
       className={`term-call term-call-${variant}`}
       onClick={() => {
         if (onCall) onCall();
+        else trackEvent('term_call', { step: 'header' });
       }}
     >
       <PhoneIcon />

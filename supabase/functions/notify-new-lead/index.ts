@@ -53,7 +53,7 @@ function termEmail(lead: Record<string, any>, reason: string) {
   const name = `${lead.first_name ?? ''} ${lead.last_name ?? ''}`.trim() || 'Name not given yet';
   const rows: [string, string][] = [
     ['Why you got this', reason],
-    ['Phone', lead.phone || '—'],
+    ['Phone', /^\d{10}$/.test(lead.phone ?? '') ? `(${lead.phone.slice(0, 3)}) ${lead.phone.slice(3, 6)}-${lead.phone.slice(6)}` : lead.phone || '—'],
     ['Email', lead.email || '—'],
     ['Coverage need', NEED_LABEL[lead.coverage_need] ?? '—'],
     ['Annual income', money(lead.annual_income)],
@@ -65,6 +65,7 @@ function termEmail(lead: Record<string, any>, reason: string) {
     ['Form completed', lead.completed ? 'Yes' : `No — stopped at "${lead.last_step ?? 'start'}"`],
     ['Tapped Call', lead.call_clicked_at ? 'Yes' : 'No'],
     ['OK to text', lead.consent_texts ? 'Yes (consent recorded)' : 'No'],
+    ['Ad source', [lead.utm_source, lead.utm_campaign].filter(Boolean).join(' / ') || (lead.gclid ? 'Google Ads' : lead.fbclid ? 'Facebook/Instagram' : 'Direct / unknown')],
   ];
   const tag = reason.includes('Call') ? 'CALLING NOW' : 'Completed form';
   return {

@@ -1,19 +1,22 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import TermHeader from './TermHeader';
 import CallButton from './CallButton';
 import { NEEDS, INCOME_MULTIPLE } from './termConfig';
+import { captureAttribution } from './attribution';
+import { trackEvent } from './track';
 
 const ICONS = {
   living: (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <path d="M14 24s-9-5.4-9-11.7A5 5 0 0 1 14 9.6a5 5 0 0 1 9 2.7C23 18.6 14 24 14 24z" />
       <path d="M8.5 14h3.5l1.5-3 2 5.5 1.5-2.5h2.5" />
     </svg>
   ),
   temporary: (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <circle cx="9" cy="9" r="3.5" />
       <path d="M3 22c0-4 2.7-6.5 6-6.5s6 2.5 6 6.5" />
       <circle cx="19.5" cy="11" r="2.8" />
@@ -21,7 +24,7 @@ const ICONS = {
     </svg>
   ),
   mortgage: (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
       <path d="M4 13 14 5l10 8" />
       <path d="M7 11v12h14V11" />
       <path d="M12 23v-6h4v6" />
@@ -29,13 +32,37 @@ const ICONS = {
   ),
 };
 
-const STEPS = [
-  { n: '1', t: 'Answer 7 quick questions', b: 'About two minutes. No medical exam to get started and no Social Security number.' },
-  { n: '2', t: 'See your starting coverage', b: `Sized to your income (${INCOME_MULTIPLE}×) or your mortgage — whichever you're protecting.` },
-  { n: '3', t: 'Talk to a licensed agent', b: 'They find your price and walk you through applying. Call any time if you’d rather start there.' },
+const HOW = [
+  { t: 'Tap what you want to protect', b: 'Then answer 5 quick questions — about two minutes.' },
+  { t: 'See your starting coverage', b: `Sized to your income (${INCOME_MULTIPLE}×) or your mortgage balance.` },
+  { t: 'Get real prices from an agent', b: 'A licensed agent compares options for you. No obligation.' },
+];
+
+const FAQ = [
+  {
+    q: 'Do I need a medical exam?',
+    a: 'Not to get started. Depending on your age, health and coverage amount, many people can apply without one — your agent will tell you up front.',
+  },
+  {
+    q: 'How much does it cost?',
+    a: 'Term is usually the most affordable kind of life insurance. Your price depends on age, health, tobacco use, coverage amount and term length. An agent gets you exact prices.',
+  },
+  {
+    q: 'What are living benefits?',
+    a: 'Riders that let you use part of your coverage while you’re alive if you have a qualifying serious illness, so you can keep paying bills. Availability varies by insurer and state.',
+  },
+  {
+    q: 'Will I get spammed?',
+    a: 'No. Your information is only used to help with your coverage request, and you choose whether we can text you.',
+  },
 ];
 
 export default function TermLanding() {
+  useEffect(() => {
+    captureAttribution();
+    trackEvent('term_view');
+  }, []);
+
   return (
     <div className="term-page">
       <TermHeader />
@@ -44,36 +71,49 @@ export default function TermLanding() {
         <div className="term-hero-inner">
           <div className="eyebrow on-ink">Term life coverage</div>
           <h1>
-            Protect your paycheck, your family and your home — <em>without overpaying.</em>
+            Protect your paycheck, your family and your home — <em>see your coverage in 2 minutes.</em>
           </h1>
-          <p className="term-hero-lede">
-            Simple, affordable coverage for the years that matter most. Answer a few questions to see
-            your starting coverage, or call and talk to a licensed agent right now.
-          </p>
-          <div className="term-hero-ctas">
-            <Link href="/term/apply" className="btn btn-brass">See my coverage</Link>
-            <CallButton variant="ghost" />
+          <p className="term-hero-lede">No exam to get started. No Social Security number. Real people, licensed agents.</p>
+
+          <div className="term-hero-pick">
+            <div className="term-hero-q">What do you want to protect?</div>
+            <div className="term-hero-cards">
+              {Object.values(NEEDS).map((n) => (
+                <Link
+                  key={n.key}
+                  href={`/term/apply?need=${n.key}`}
+                  className="term-hero-card"
+                  onClick={() => trackEvent('term_start', { need: n.key, from: 'hero' })}
+                >
+                  <span className="term-hero-card-icon">{ICONS[n.key]}</span>
+                  <span className="term-hero-card-text">
+                    <span className="term-hero-card-title">{n.title}</span>
+                    <span className="term-hero-card-tag">{n.tag}</span>
+                  </span>
+                  <span className="term-hero-card-arrow" aria-hidden="true">→</span>
+                </Link>
+              ))}
+            </div>
+            <div className="term-hero-alt">
+              <span>Prefer to talk?</span>
+              <CallButton variant="ghost" onCall={() => trackEvent('term_call', { step: 'landing_hero' })} />
+            </div>
           </div>
-          <ul className="term-trust">
-            <li>No exam to get started</li>
-            <li>No SSN needed</li>
-            <li>Licensed agents, real people</li>
-          </ul>
         </div>
       </section>
 
       <section className="term-needs">
         <div className="term-section-inner">
-          <h2>What do you want to protect?</h2>
-          <p className="term-section-lede">Pick one to get started — it takes about two minutes.</p>
+          <h2>Three ways term coverage protects you</h2>
           <div className="term-need-grid">
             {Object.values(NEEDS).map((n) => (
-              <Link key={n.key} href={`/term/apply?need=${n.key}`} className="term-need-card">
+              <Link key={n.key} href={`/term/apply?need=${n.key}`} className="term-need-card"
+                onClick={() => trackEvent('term_start', { need: n.key, from: 'cards' })}>
                 <span className="term-need-icon">{ICONS[n.key]}</span>
                 <span className="term-need-tag">{n.tag}</span>
                 <span className="term-need-title">{n.title}</span>
                 <span className="term-need-body">{n.body}</span>
-                <span className="term-need-cta">Start →</span>
+                <span className="term-need-cta">See my coverage →</span>
               </Link>
             ))}
           </div>
@@ -84,9 +124,9 @@ export default function TermLanding() {
         <div className="term-section-inner">
           <h2>How it works</h2>
           <ol className="term-how-list">
-            {STEPS.map((s) => (
-              <li key={s.n}>
-                <span className="term-how-num">{s.n}</span>
+            {HOW.map((s, i) => (
+              <li key={s.t}>
+                <span className="term-how-num">{i + 1}</span>
                 <div>
                   <div className="term-how-title">{s.t}</div>
                   <div className="term-how-body">{s.b}</div>
@@ -97,13 +137,30 @@ export default function TermLanding() {
         </div>
       </section>
 
+      <section className="term-faq">
+        <div className="term-section-inner term-faq-inner">
+          <h2>Common questions</h2>
+          {FAQ.map((f) => (
+            <details key={f.q} className="term-faq-item">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       <section className="term-talk">
         <div className="term-section-inner term-talk-inner">
           <div>
-            <h2>Rather talk to a person?</h2>
-            <p>A licensed agent can answer your questions and get you a price on the phone.</p>
+            <h2>Ready when you are.</h2>
+            <p>Two minutes online, or talk to a licensed agent now.</p>
           </div>
-          <CallButton variant="solid" />
+          <div className="term-talk-ctas">
+            <Link href="/term/apply" className="btn btn-brass" onClick={() => trackEvent('term_start', { from: 'footer_cta' })}>
+              See my coverage →
+            </Link>
+            <CallButton variant="solid" onCall={() => trackEvent('term_call', { step: 'landing_footer' })} />
+          </div>
         </div>
       </section>
 
@@ -124,7 +181,7 @@ export default function TermLanding() {
       </footer>
 
       <div className="term-callbar">
-        <CallButton variant="solid" label="Call for live help" />
+        <CallButton variant="solid" label="Call for live help" onCall={() => trackEvent('term_call', { step: 'landing_bar' })} />
       </div>
     </div>
   );

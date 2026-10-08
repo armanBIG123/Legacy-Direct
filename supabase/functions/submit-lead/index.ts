@@ -38,6 +38,8 @@ const TERM_FIELDS = [
   'coverage_need', 'annual_income', 'mortgage_balance', 'suggested_coverage',
   'first_name', 'last_name', 'date_of_birth', 'zip', 'tobacco_last_2_years', 'email', 'phone',
   'consent_texts', 'consent_text_wording', 'source_url',
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid',
+  'landing_page', 'referrer',
 ];
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
