@@ -11,6 +11,7 @@ import ContactScreen from './ContactScreen';
 import ReviewScreen from './ReviewScreen';
 import DoneScreen from './DoneScreen';
 import { visibleSteps } from './quizConfig';
+import { submitLead } from './submitLead';
 
 const INITIAL_DATA = {
   coverageFor: null,
@@ -43,6 +44,7 @@ const INITIAL_DATA = {
   mobile: '',
   wantsEmailUpdates: false,
   wantsTexts: false,
+  website: '', // honeypot — stays empty for real visitors
 };
 
 // How long a picked answer stays highlighted before auto-advancing.
@@ -53,6 +55,8 @@ export default function ApplyFlow() {
   const [stepId, setStepId] = useState(null);
   const [data, setData] = useState(INITIAL_DATA);
   const advancing = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const update = (patch) => setData((d) => ({ ...d, ...patch }));
 
@@ -114,6 +118,21 @@ export default function ApplyFlow() {
     setStepId(steps[steps.length - 1].id);
     setStage('question');
     scrollTop();
+  }
+
+  async function handleSubmit() {
+    if (submitting) return;
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      await submitLead(data);
+      setStage('done');
+      scrollTop();
+    } catch (err) {
+      setSubmitError(err.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function handleStartOver() {
@@ -190,7 +209,9 @@ export default function ApplyFlow() {
                 data={data}
                 onBack={() => setStage('contact')}
                 onEditAnswers={goToFirstQuestion}
-                onContinue={() => setStage('done')}
+                onContinue={handleSubmit}
+                submitting={submitting}
+                error={submitError}
               />
             )}
 
