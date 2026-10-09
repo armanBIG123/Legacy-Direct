@@ -7,6 +7,7 @@ import CallButton from './CallButton';
 import { NEEDS, INCOME_MULTIPLE } from './termConfig';
 import { captureAttribution } from './attribution';
 import { trackEvent } from './track';
+import { SAVE_NOTICE } from './disclosures';
 
 const ICONS = {
   living: (
@@ -35,7 +36,7 @@ const ICONS = {
 const HOW = [
   { t: 'Tap what you want to protect', b: 'Then answer 5 quick questions — about two minutes.' },
   { t: 'See your starting coverage', b: `Sized to your income (${INCOME_MULTIPLE}×) or your mortgage balance.` },
-  { t: 'Get real prices from an agent', b: 'A licensed agent compares options for you. No obligation.' },
+  { t: 'Finish with a real, licensed agent', b: 'Start online, then an agent compares insurers and gets you exact prices. No obligation.' },
 ];
 
 const FAQ = [
@@ -94,10 +95,34 @@ export default function TermLanding() {
                 </Link>
               ))}
             </div>
+            <p className="term-hero-notice">
+              {SAVE_NOTICE} <a href="/data-use#term">How we use your information</a>
+            </p>
             <div className="term-hero-alt">
               <span>Prefer to talk?</span>
               <CallButton variant="ghost" onCall={() => trackEvent('term_call', { step: 'landing_hero' })} />
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="term-myth">
+        <div className="term-section-inner term-myth-inner">
+          <div className="term-myth-stat">
+            <span className="term-myth-num">10–12×</span>
+            <span className="term-myth-label">how much adults 30 and under overestimate the cost of term life</span>
+          </div>
+          <div className="term-myth-copy">
+            <h2>It probably costs less than you think.</h2>
+            <p>
+              In LIMRA&rsquo;s 2025 research, young adults guessed a $250,000, 20-year term policy costs
+              10 to 12 times more than it actually does. Cost is the #1 reason people put this off — so
+              see your real number before you decide.
+            </p>
+            <Link href="/term/apply" className="btn btn-brass" onClick={() => trackEvent('term_start', { from: 'myth' })}>
+              See my coverage →
+            </Link>
+            <p className="term-myth-source">Source: LIMRA &amp; Life Happens, 2025 Insurance Barometer Study.</p>
           </div>
         </div>
       </section>

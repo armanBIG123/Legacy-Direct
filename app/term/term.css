@@ -599,8 +599,116 @@
   margin-bottom: 14px;
 }
 
+/* ---------- Disclosures ---------- */
+.term-save-notice,
+.term-hero-notice {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  margin-top: 14px;
+}
+.term-hero-notice {
+  color: #BDB3CB;
+  margin-top: 12px;
+}
+.term-save-notice a,
+.term-hero-notice a,
+.term-contact-notice a {
+  text-decoration: underline;
+}
+.term-contact-notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #F5EEDD;
+  border: 1px solid #E8D9B4;
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: -8px 0 20px;
+}
+.term-contact-notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--brass-deep);
+}
+.term-call-notice {
+  flex-basis: 100%;
+  font-size: 12.5px;
+  color: var(--muted);
+  margin: 0;
+}
+.term-callbar-note {
+  font-size: 11.5px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* ---------- Cost myth ---------- */
+.term-myth {
+  padding: 56px 24px 0;
+}
+.term-myth-inner {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 36px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #E2D9CA;
+  border-radius: 18px;
+  padding: 32px 34px;
+}
+.term-myth-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-right: 1px solid #EEE7DA;
+  padding-right: 28px;
+}
+.term-myth-num {
+  font-family: var(--font-display);
+  font-size: 64px;
+  line-height: 1;
+  color: var(--brass-deep);
+}
+.term-myth-label {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.term-myth-copy h2 {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 3.2vw, 32px);
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.term-myth-copy p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+.term-myth-copy .term-myth-source {
+  font-size: 12px;
+  margin: 12px 0 0;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
+  .term-myth-inner {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 24px 22px;
+  }
+  .term-myth-stat {
+    border-right: none;
+    padding-right: 0;
+    border-bottom: 1px solid #EEE7DA;
+    padding-bottom: 16px;
+  }
   .term-need-grid,
   .term-how-list,
   .term-hero-cards {
@@ -667,6 +775,15 @@
   }
   .term-hero-alt {
     display: none; /* the sticky call bar covers it */
+  }
+  .term-myth {
+    padding: 40px 16px 0;
+  }
+  .term-myth-num {
+    font-size: 52px;
+  }
+  .term-page {
+    padding-bottom: 100px; /* room for the call bar + its note */
   }
   .term-main {
     padding-top: 24px;

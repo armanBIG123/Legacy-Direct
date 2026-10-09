@@ -1,5 +1,5 @@
 import { SUBMIT_URL, leadsConfigured } from '../apply/leadConfig';
-import { TEXT_CONSENT_WORDING } from '../apply/submitLead';
+import { CONSENT_WORDING, DISCLOSURE_VERSION } from './disclosures';
 import { suggestedCoverage } from './termConfig';
 import { getAttribution } from './attribution';
 
@@ -48,7 +48,9 @@ export function buildTermRow(data, extra = {}) {
     email: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test((data.email || '').trim()) ? clean(data.email, 200) : null,
     phone: digits.length >= 10 ? digits.slice(0, 15) : null,
     consent_texts: !!data.wantsTexts && digits.length >= 10,
-    consent_text_wording: data.wantsTexts && digits.length >= 10 ? TEXT_CONSENT_WORDING : null,
+    consent_text_wording: data.wantsTexts && digits.length >= 10 ? CONSENT_WORDING : null,
+    consent_recorded_at: data.wantsTexts && digits.length >= 10 ? data.consentAt || null : null,
+    disclosure_version: DISCLOSURE_VERSION,
     source_url: typeof window !== 'undefined' ? window.location.href.slice(0, 500) : null,
     ...getAttribution(),
     ...extra,

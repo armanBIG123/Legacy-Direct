@@ -40,6 +40,7 @@ const TERM_FIELDS = [
   'consent_texts', 'consent_text_wording', 'source_url',
   'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'gclid', 'fbclid',
   'landing_page', 'referrer',
+  'consent_recorded_at', 'disclosure_version',
 ];
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -115,6 +116,8 @@ Deno.serve(async (req) => {
     for (const key of TERM_FIELDS) if (key in input) row[key] = input[key];
     if (typeof row.email === 'string') row.email = row.email.trim().toLowerCase() || null;
     row.user_agent = (req.headers.get('user-agent') ?? '').slice(0, 500);
+    // Proof of consent: where the request came from, recorded by the server.
+    if (ip) row.ip_address = ip.slice(0, 64);
 
     const up = await rest('term_leads?on_conflict=session_id', {
       method: 'POST',

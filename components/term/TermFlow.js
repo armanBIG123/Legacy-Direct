@@ -7,7 +7,7 @@ import CallButton from './CallButton';
 import ProgressTrack from '../apply/ProgressTrack';
 import Turnstile from '../apply/Turnstile';
 import { TURNSTILE_SITE_KEY, leadsConfigured } from '../apply/leadConfig';
-import { TEXT_CONSENT_WORDING } from '../apply/submitLead';
+import { SAVE_NOTICE, CONTACT_NOTICE, CALL_NOTICE, CONSENT_WORDING } from './disclosures';
 import { NEEDS, INCOME_MULTIPLE, AGENT_PHONE_DISPLAY, suggestedCoverage, formatMoney, shortMoney } from './termConfig';
 import { sendSnapshot, submitTermLead, hasAnyAnswer, hasContact, parseDob, ageFrom, phoneDigits } from './submitTermLead';
 import { captureAttribution } from './attribution';
@@ -26,7 +26,8 @@ const INITIAL = {
   lastName: '',
   email: '',
   phone: '',
-  wantsTexts: false,
+  wantsTexts: false, // calls + texts incl. automated (see disclosures.js)
+  consentAt: null,
   website: '', // honeypot — real people never fill this
   completed: false,
   callClickedAt: null,
@@ -350,6 +351,9 @@ export default function TermFlow() {
                         <Choice key={n.key} selected={data.need === n.key} onClick={() => choose({ need: n.key })} title={n.title} tag={n.tag} body={n.body} />
                       ))}
                     </div>
+                    <p className="term-save-notice">
+                      {SAVE_NOTICE} <a href="/data-use#term">How we use your information</a>
+                    </p>
                   </>
                 )}
 
@@ -481,6 +485,15 @@ export default function TermFlow() {
                       <h1>Where should we send your options?</h1>
                       <p className="apply-subtitle">A licensed agent will follow up with real prices. No spam.</p>
                     </div>
+                    <div className="term-contact-notice" role="note">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                        <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
+                        <path d="M8 7v4M8 5h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      </svg>
+                      <span>
+                        {CONTACT_NOTICE} <a href="/data-use#term">Learn more</a>
+                      </span>
+                    </div>
                     <div className="apply-name-row">
                       <div className="apply-field">
                         <label htmlFor="t-first">First name</label>
@@ -510,8 +523,14 @@ export default function TermFlow() {
                     </div>
                     {phoneDigits(data.phone).length === 10 && (
                       <label className="apply-checkbox-row">
-                        <input type="checkbox" checked={data.wantsTexts} onChange={(e) => update({ wantsTexts: e.target.checked })} />
-                        <span>{TEXT_CONSENT_WORDING}</span>
+                        <input
+                          type="checkbox"
+                          checked={data.wantsTexts}
+                          onChange={(e) => update({ wantsTexts: e.target.checked, consentAt: e.target.checked ? new Date().toISOString() : null })}
+                        />
+                        <span>
+                          <strong>Optional:</strong> {CONSENT_WORDING}
+                        </span>
                       </label>
                     )}
                     <div className="apply-hp" aria-hidden="true">
@@ -557,6 +576,7 @@ export default function TermFlow() {
                 <div className="term-inline-call">
                   <span>Rather talk it through?</span>
                   <CallButton onCall={handleCall} variant="outline" />
+                  <p className="term-call-notice">{CALL_NOTICE}</p>
                 </div>
               </form>
             )}
@@ -574,6 +594,7 @@ export default function TermFlow() {
       {/* Phones: Call button always within thumb reach */}
       <div className="term-callbar">
         <CallButton onCall={handleCall} variant="solid" label="Call for live help" />
+        {!done && hasAnyAnswer(data) && <p className="term-callbar-note">The agent will see the answers you&rsquo;ve given so far.</p>}
       </div>
 
       <footer className="apply-footer">

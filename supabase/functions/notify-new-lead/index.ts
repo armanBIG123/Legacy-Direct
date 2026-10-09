@@ -64,7 +64,7 @@ function termEmail(lead: Record<string, any>, reason: string) {
     ['ZIP', lead.zip || '—'],
     ['Form completed', lead.completed ? 'Yes' : `No — stopped at "${lead.last_step ?? 'start'}"`],
     ['Tapped Call', lead.call_clicked_at ? 'Yes' : 'No'],
-    ['OK to text', lead.consent_texts ? 'Yes (consent recorded)' : 'No'],
+    ['Automated calls/texts', lead.consent_texts ? `Allowed — consent recorded ${lead.consent_recorded_at ?? ''}` : 'NOT allowed — manual dial only'],
     ['Ad source', [lead.utm_source, lead.utm_campaign].filter(Boolean).join(' / ') || (lead.gclid ? 'Google Ads' : lead.fbclid ? 'Facebook/Instagram' : 'Direct / unknown')],
   ];
   const tag = reason.includes('Call') ? 'CALLING NOW' : 'Completed form';
@@ -78,7 +78,7 @@ function termEmail(lead: Record<string, any>, reason: string) {
       <table style="border-collapse:collapse;width:100%;font-size:14px">
         ${rows.map(([k, v]) => `<tr><td style="padding:7px 10px;border-bottom:1px solid #eee;color:#665A70;width:40%">${esc(k)}</td><td style="padding:7px 10px;border-bottom:1px solid #eee;font-weight:600">${esc(v)}</td></tr>`).join('')}
       </table>
-      <p style="font-size:12px;color:#665A70;margin-top:16px">Lead ID ${esc(lead.id)}. Contains personal information — don't forward outside the team.</p>
+      <p style="font-size:12px;color:#665A70;margin-top:16px">Lead ID ${esc(lead.id)} · disclosures ${esc(lead.disclosure_version ?? '—')} · IP ${esc(lead.ip_address ?? '—')}. Contains personal information — don't forward outside the team.</p>
     </div>`,
   };
 }

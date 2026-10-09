@@ -2,6 +2,8 @@ import '../apply/apply.css';
 import './data-use.css';
 import Link from 'next/link';
 import ApplyHeader from '@/components/apply/ApplyHeader';
+import { AGENT_PHONE_DISPLAY } from '@/components/term/termConfig';
+import { CONSENT_WORDING, DISCLOSURE_VERSION } from '@/components/term/disclosures';
 
 export const metadata = {
   title: 'How application information is used — LegacyDirect',
@@ -14,15 +16,58 @@ export default function DataUsePage() {
 
       <main className="apply-main">
         <div className="data-use-layout">
-          <Link href="/apply" className="data-use-back">
+          <Link href="/" className="data-use-back">
             ← Back to LegacyDirect
           </Link>
 
           <div className="apply-eyebrow">Data-use notice</div>
           <h1 className="data-use-title">How LegacyDirect uses your application information</h1>
           <p className="apply-subtitle">
-            This is the notice referenced during the plan-preview flow.
+            Plain-language notice for our coverage quizzes and phone help.
           </p>
+
+          <section className="data-use-section data-use-term" id="term">
+            <h2>Term coverage requests: saved as you go</h2>
+            <p>
+              When you answer questions in our term coverage quiz, your answers are saved as you enter
+              them — even if you don&rsquo;t finish or don&rsquo;t press the final button. That includes
+              contact details once you type them. We do this so a licensed LegacyDirect agent can help
+              with the request you started, and so you don&rsquo;t have to start over.
+            </p>
+            <p>
+              A licensed agent may contact you about that request at the email or phone number you
+              entered. Automated or prerecorded calls and texts are only used if you check the
+              optional consent box, which reads: &ldquo;{CONSENT_WORDING}&rdquo;
+            </p>
+          </section>
+
+          <section className="data-use-section">
+            <h2>When you tap &ldquo;Call&rdquo;</h2>
+            <p>
+              Tapping a Call button connects you to a licensed LegacyDirect agent. At that moment we
+              save the answers you&rsquo;ve given so far, and the agent who takes your call can see
+              them, so you don&rsquo;t have to repeat yourself.
+            </p>
+          </section>
+
+          <section className="data-use-section">
+            <h2>Proof of what you agreed to</h2>
+            <p>
+              With each term coverage request we keep the time, the web address you used, your device&rsquo;s browser
+              type and IP address, any ad campaign that brought you to us, and the version of the
+              notices you were shown (currently {DISCLOSURE_VERSION}). This helps us honor your choices
+              and show what you agreed to.
+            </p>
+          </section>
+
+          <section className="data-use-section">
+            <h2>Stopping contact or deleting your information</h2>
+            <p>
+              Reply STOP to any text, or tell your agent you don&rsquo;t want further calls, and
+              we&rsquo;ll stop. To ask us to delete the information you entered, call us at{' '}
+              {AGENT_PHONE_DISPLAY}.
+            </p>
+          </section>
 
           <div className="data-use-callout">
             <strong>Application information is private.</strong> Access is separated by role. The
