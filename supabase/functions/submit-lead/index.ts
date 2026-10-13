@@ -28,13 +28,13 @@ const ALLOWED_FIELDS = [
   'coverage_for', 'insured_first_name', 'insured_last_name', 'contact_email', 'contact_mobile',
   'goals', 'trigger_reason', 'dependents', 'children_under_18', 'mortgage_remaining', 'state',
   'date_of_birth', 'sex', 'height_inches', 'weight_lbs', 'tobacco', 'citizenship',
-  'monthly_budget', 'timing', 'matched_plan',
+  'zip', 'monthly_budget', 'timing', 'matched_plan',
   'consent_reminder_email', 'consent_updates_email', 'consent_texts', 'consent_text_wording',
   'source_url',
 ];
 
 const TERM_FIELDS = [
-  'completed', 'call_clicked_at', 'last_step',
+  'completed', 'call_clicked_at', 'last_step', 'coverage_for',
   'coverage_need', 'annual_income', 'mortgage_balance', 'suggested_coverage',
   'first_name', 'last_name', 'date_of_birth', 'zip', 'tobacco_last_2_years', 'email', 'phone',
   'consent_texts', 'consent_text_wording', 'source_url',

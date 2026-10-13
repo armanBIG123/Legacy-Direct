@@ -53,6 +53,7 @@ function termEmail(lead: Record<string, any>, reason: string) {
   const name = `${lead.first_name ?? ''} ${lead.last_name ?? ''}`.trim() || 'Name not given yet';
   const rows: [string, string][] = [
     ['Why you got this', reason],
+    ['Coverage for', lead.coverage_for === 'someone-else' ? 'Someone else (filled out by family/friend)' : lead.coverage_for === 'me' ? 'Themselves' : '—'],
     ['Phone', /^\d{10}$/.test(lead.phone ?? '') ? `(${lead.phone.slice(0, 3)}) ${lead.phone.slice(3, 6)}-${lead.phone.slice(6)}` : lead.phone || '—'],
     ['Email', lead.email || '—'],
     ['Coverage need', NEED_LABEL[lead.coverage_need] ?? '—'],
@@ -67,7 +68,7 @@ function termEmail(lead: Record<string, any>, reason: string) {
     ['Automated calls/texts', lead.consent_texts ? `Allowed — consent recorded ${lead.consent_recorded_at ?? ''}` : 'NOT allowed — manual dial only'],
     ['Ad source', [lead.utm_source, lead.utm_campaign].filter(Boolean).join(' / ') || (lead.gclid ? 'Google Ads' : lead.fbclid ? 'Facebook/Instagram' : 'Direct / unknown')],
   ];
-  const tag = reason.includes('Call') ? 'CALLING NOW' : 'Completed form';
+  const tag = reason.includes('Call') ? 'CALLING NOW' : reason.startsWith('Left') ? 'LEFT MID-FORM' : 'Completed form';
   return {
     subject: `Term lead (${tag}): ${name} · ${NEED_LABEL[lead.coverage_need] ?? 'Term'}`,
     reply_to: lead.email || undefined,
@@ -89,6 +90,7 @@ function termReason(type: string, rec: Record<string, any>, old: Record<string, 
   if (type === 'UPDATE' && old) {
     if (rec.call_clicked_at && !old.call_clicked_at) return 'Tapped Call for live help';
     if (rec.completed && !old.completed) return 'Completed the term quiz';
+    if (rec.abandoned_alerted_at && !old.abandoned_alerted_at) return 'Left the form after giving contact info — follow up';
   }
   return null;
 }
@@ -140,6 +142,7 @@ Deno.serve(async (req) => {
     ['Children under 18', lead.children_under_18 ?? '—'],
     ['Mortgage left', lead.mortgage_remaining != null ? `$${Number(lead.mortgage_remaining).toLocaleString('en-US')}` : '—'],
     ['State', lead.state || '—'],
+    ['ZIP', lead.zip || '—'],
     ['Date of birth', lead.date_of_birth || '—'],
     ['Sex', lead.sex || '—'],
     ['Height / weight', `${heightText(lead.height_inches)} / ${lead.weight_lbs ? lead.weight_lbs + ' lb' : '—'}`],
