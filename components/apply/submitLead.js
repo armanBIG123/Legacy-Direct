@@ -33,6 +33,7 @@ export function buildLeadRow(data) {
     children_under_18: (data.dependents || []).includes('children') ? data.childrenCount : null,
     mortgage_remaining: data.mortgageTouched ? Number(data.mortgage) || 0 : null,
     state: clean(data.state, 40),
+    zip: /^\d{5}$/.test(data.zip || '') ? data.zip : null,
     date_of_birth: dob,
     sex: data.sex,
     height_inches: data.hwTouched ? Number(data.heightFeet) * 12 + Number(data.heightInches) : null,

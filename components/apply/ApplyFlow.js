@@ -21,6 +21,8 @@ const INITIAL_DATA = {
   subjectFirstName: '',
   subjectLastName: '',
   yourEmail: '',
+  zip: '',
+  stateFromZip: false, // true when state was filled in from the ZIP
   wantsPreviewReminder: false,
   goals: [],
   trigger: null,

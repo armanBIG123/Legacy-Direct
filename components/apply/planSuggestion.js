@@ -178,6 +178,7 @@ export function answerRows(data) {
     hasKids ? { label: 'Children under 18', value: data.childrenCount != null ? LABELS.childrenCount[data.childrenCount] : null } : null,
     { label: 'Mortgage left', value: data.mortgageTouched ? (data.mortgage >= 1000000 ? '$1M+' : formatMoney(data.mortgage || 0)) : null },
     { label: 'State', value: data.state || null },
+    { label: 'ZIP code', value: /^\d{5}$/.test(data.zip || '') ? data.zip : null },
     { label: 'Date of birth', value: formatDob(data) },
     { label: 'Sex on application', value: sexLabel(data.sex) },
     { label: 'Height & weight', value: data.hwTouched ? formatHeightWeight(data) : null },

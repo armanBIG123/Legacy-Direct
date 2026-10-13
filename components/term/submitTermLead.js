@@ -36,6 +36,7 @@ export function buildTermRow(data, extra = {}) {
     completed: !!data.completed,
     call_clicked_at: data.callClickedAt || null,
     last_step: clean(data.lastStep, 40),
+    coverage_for: data.coverageFor === 'me' || data.coverageFor === 'someone-else' ? data.coverageFor : null,
     coverage_need: data.need || null,
     annual_income: data.need && data.need !== 'mortgage' && data.incomeTouched ? Number(data.income) || 0 : null,
     mortgage_balance: data.need === 'mortgage' && data.mortgageTouched ? Number(data.mortgage) || 0 : null,

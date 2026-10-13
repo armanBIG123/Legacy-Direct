@@ -110,7 +110,8 @@ export const QUESTION_STEPS = [
     when: (d) => (d.dependents || []).includes('children'),
   }),
   { id: 'mortgage', Component: MortgageStep, isValid: mortgageIsValid, onLeave: { mortgageTouched: true } },
-  { id: 'state', Component: StateStep, isValid: stateIsValid },
+  // Skipped when the ZIP on the first screen already tells us the state.
+  { id: 'state', Component: StateStep, isValid: stateIsValid, when: (d) => !d.stateFromZip },
   { id: 'dob', Component: DobStep, isValid: dobIsValid },
   { id: 'sex', Component: SexStep, isValid: sexIsValid },
   { id: 'heightWeight', Component: HeightWeightStep, isValid: heightWeightIsValid, onLeave: { hwTouched: true } },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { stateFromZip } from './zipState';
 
 export default function GateScreen({ data, update, onContinue, onBack }) {
   const [touched, setTouched] = useState(false);
@@ -12,8 +13,9 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
   const lastName = isMe ? data.applicantLastName : data.subjectLastName;
   const email = isMe ? data.applicantEmail : data.yourEmail;
 
+  const zipOk = /^\d{5}$/.test(data.zip || '');
   const canContinue =
-    !!data.coverageFor && !!firstName && !!lastName && !!email && email.includes('@');
+    !!data.coverageFor && !!firstName && !!lastName && !!email && email.includes('@') && zipOk;
 
   function handleContinue() {
     if (!canContinue) {
@@ -26,6 +28,10 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
     if (isMe) {
       update({ subjectFirstName: data.applicantFirstName, subjectLastName: data.applicantLastName });
     }
+    // The ZIP tells us the state, so that question can be skipped later.
+    const st = stateFromZip(data.zip);
+    if (st) update({ state: st, stateFromZip: true });
+    else if (data.stateFromZip) update({ state: '', stateFromZip: false });
     onContinue();
   }
 
@@ -34,7 +40,7 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
       <div className="apply-eyebrow">Before we start</div>
       <h1>Who is this coverage for?</h1>
       <p className="apply-subtitle">
-        Pick one, then add a name and email so you can pick this back up if you step away.
+        Pick one, then add a name, email and ZIP code so you can pick this back up if you step away.
       </p>
 
       <div className="apply-card-grid apply-card-grid-2 apply-gate-cards">
@@ -115,6 +121,21 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
             )}
           </div>
 
+          <div className="apply-field apply-field-zip">
+            <label htmlFor="gate-zip">{isMe ? 'Your ZIP code' : 'ZIP code where they live'}</label>
+            <input
+              id="gate-zip"
+              className="apply-input"
+              inputMode="numeric"
+              autoComplete={isMe ? 'postal-code' : 'off'}
+              placeholder="72201"
+              maxLength={5}
+              value={data.zip || ''}
+              onChange={(e) => update({ zip: e.target.value.replace(/\D/g, '').slice(0, 5) })}
+            />
+            <p className="apply-field-note">Coverage options vary by state.</p>
+          </div>
+
           <label className="apply-checkbox-row">
             <input
               type="checkbox"
@@ -126,7 +147,7 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
 
           {touched && !canContinue && (
             <p className="apply-field-note apply-field-note-warn">
-              Add a first name, last name, and a valid email to continue.
+              Add a first name, last name, a valid email and a 5-digit ZIP code to continue.
             </p>
           )}
         </div>
