@@ -1175,3 +1175,31 @@
 .apply-turnstile:not(:empty) {
   margin-bottom: 8px;
 }
+
+/* ZIP on the first screen — short field */
+.apply-field-zip .apply-input { max-width: 180px; }
+
+/* Phones: keep "Me / Someone else" side by side and compact, so the name
+   fields show without scrolling. */
+@media (max-width: 720px) {
+  .apply-gate-cards.apply-card-grid-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .apply-gate-cards .apply-option-card {
+    min-height: 0;
+    padding: 14px 14px 16px;
+  }
+  .apply-gate-cards .apply-gate-icon {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 8px;
+  }
+  .apply-gate-cards .apply-option-title {
+    font-size: 18px;
+  }
+  .apply-gate-cards .apply-option-body {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+}
