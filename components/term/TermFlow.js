@@ -47,18 +47,24 @@ function dobProblem(text, d) {
   return null;
 }
 
-// Five screens, in order. `auto` = picking an answer moves on by itself.
-// `when` = the screen is skipped if it returns false.
+// Screens, in order. Everything an agent needs to reach and price someone is
+// on the first screen, so it's saved even if they stop there. The last screen
+// sends the request as soon as they answer it.
+// `auto` = picking an answer moves on by itself; `when` = skipped if false.
+const startValid = (d) =>
+  !!d.coverageFor &&
+  !!d.firstName.trim() &&
+  !!d.lastName.trim() &&
+  validEmail(d.email) &&
+  (!d.phone || phoneDigits(d.phone).length === 10) &&
+  !!parseDob(d.dob) &&
+  !dobProblem(d.dob, d) &&
+  /^\d{5}$/.test(d.zip);
 const STEPS = [
-  {
-    id: 'start',
-    valid: (d) => !!d.coverageFor && d.firstName.trim() && d.lastName.trim() && validEmail(d.email) && /^\d{5}$/.test(d.zip),
-  },
+  { id: 'start', valid: startValid },
   { id: 'need', auto: true, valid: (d) => !!d.need, when: (d) => !d.needFromLanding },
   { id: 'amount', valid: () => true },
   { id: 'tobacco', auto: true, valid: (d) => !!d.tobacco },
-  { id: 'dob', valid: (d) => !!parseDob(d.dob) && !dobProblem(d.dob, d) },
-  { id: 'phone', valid: (d) => !d.phone || phoneDigits(d.phone).length === 10 },
 ];
 const visibleSteps = (d) => STEPS.filter((s) => !s.when || s.when(d));
 
@@ -127,6 +133,7 @@ export default function TermFlow() {
   const [token, setToken] = useState('');
   const [tsKey, setTsKey] = useState(0);
   const [pendingSave, setPendingSave] = useState(null);
+  const [pendingSubmit, setPendingSubmit] = useState(null);
   const [callNote, setCallNote] = useState(false);
   const sessionId = useRef(null);
   const advancing = useRef(false);
@@ -140,6 +147,7 @@ export default function TermFlow() {
   const steps = visibleSteps(data);
   const stepIndex = Math.max(0, steps.findIndex((x) => x.id === stepId));
   const step = steps[stepIndex];
+  const isLast = stepIndex === steps.length - 1;
   const who = person(data);
 
   // One id per visit, where they came from, and a need picked on the landing
@@ -185,13 +193,20 @@ export default function TermFlow() {
   }
 
   useEffect(() => {
-    if (pendingSave && token) {
+    if (!token) return;
+    if (pendingSubmit) {
+      // The final submit carries everything, so a queued save isn't needed.
+      const d = pendingSubmit;
+      setPendingSubmit(null);
+      setPendingSave(null);
+      submit(d);
+    } else if (pendingSave) {
       const s = pendingSave;
       setPendingSave(null);
       save(s, { force: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pendingSave, token]);
+  }, [pendingSave, pendingSubmit, token]);
 
   // Tapped Call: save what they've entered. Never blocks the call.
   function handleCall() {
@@ -209,11 +224,11 @@ export default function TermFlow() {
   // Typed a usable email or phone? Save quietly after a pause, so someone
   // who leaves right away is still a lead you can follow up with.
   useEffect(() => {
-    if (done || (stepId !== 'start' && stepId !== 'phone') || !hasContact(data)) return;
+    if (done || stepId !== 'start' || !hasContact(data)) return;
     const t = setTimeout(() => save({ ...latest.current, lastStep: stepId }), 1500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data.email, data.phone, data.firstName, data.lastName, data.zip, data.coverageFor, stepId, done]);
+  }, [data.email, data.phone, data.firstName, data.lastName, data.dob, data.zip, data.coverageFor, data.wantsTexts, stepId, done]);
 
   // Leaving the page mid-form: one last save if we can reach them.
   useEffect(() => {
@@ -259,9 +274,23 @@ export default function TermFlow() {
     if (patch.need) trackEvent('term_start', { need: patch.need, from: 'quiz' });
     setTimeout(() => {
       advancing.current = false;
-      const id = nextId(d);
-      if (id) goTo(id);
+      if (isLast) finish(d);
+      else {
+        const id = nextId(d);
+        if (id) goTo(id);
+      }
     }, 200);
+  }
+
+  // Send the finished request, waiting for the security check if needed.
+  function finish(d = data) {
+    if (submitting || pendingSubmit) return;
+    if (leadsConfigured && !tokenRef.current) {
+      setError('');
+      setPendingSubmit(d);
+    } else {
+      submit(d);
+    }
   }
 
   function back() {
@@ -274,19 +303,19 @@ export default function TermFlow() {
     goTo('need');
   }
 
-  async function submit() {
+  async function submit(d = data) {
     if (submitting) return;
-    if (!step.valid(data)) {
+    if (!step.valid(d)) {
       setTried(true);
       return;
     }
     setSubmitting(true);
     setError('');
     try {
-      await submitTermLead(sessionId.current, token, data);
-      setData((d) => ({ ...d, completed: true }));
+      await submitTermLead(sessionId.current, tokenRef.current, d);
+      setData((x) => ({ ...x, completed: true }));
       setDone(true);
-      trackEvent('term_lead', { need: data.need, coverage: suggestedCoverage(data) });
+      trackEvent('term_lead', { need: d.need, coverage: suggestedCoverage(d) });
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
       setError(err.message);
@@ -298,7 +327,7 @@ export default function TermFlow() {
 
   function onFormSubmit(e) {
     e.preventDefault();
-    if (stepId === 'phone') submit();
+    if (isLast) finish();
     else if (!step.auto) next(stepId === 'amount' ? amountPatch() : {});
   }
 
@@ -310,7 +339,6 @@ export default function TermFlow() {
   const amountPatch = () => (amountKey === 'mortgage' ? { mortgageTouched: true } : { incomeTouched: true });
   const setAmount = (v) => update(amountKey === 'mortgage' ? { mortgage: v, mortgageTouched: true } : { income: v, incomeTouched: true });
   const valid = step.valid(data);
-  const checking = leadsConfigured && !token;
   const dobErr = dobProblem(data.dob, data);
 
   // Field-level hints, shown after they try to continue.
@@ -320,8 +348,10 @@ export default function TermFlow() {
     lastName: !data.lastName.trim() && 'Add a last name',
     email: !validEmail(data.email) && 'Enter a valid email',
     zip: !/^\d{5}$/.test(data.zip) && 'Enter a 5-digit ZIP code',
+    dob: dobErr || (!parseDob(data.dob) && 'Enter the date of birth as MM/DD/YYYY'),
+    phone: data.phone && phoneDigits(data.phone).length !== 10 && 'Enter a 10-digit number, or leave it blank',
   };
-  const phoneError = data.phone && phoneDigits(data.phone).length !== 10 && 'Enter a 10-digit number, or leave it blank';
+  const sending = submitting || !!pendingSubmit;
 
   return (
     <div className="apply-page term-page">
@@ -378,7 +408,7 @@ export default function TermFlow() {
                     <div className="apply-step-heading">
                       <div className="apply-eyebrow">Term coverage</div>
                       <h1>Who is this coverage for?</h1>
-                      <p className="apply-subtitle">Pick one, then add a name, email and ZIP code — about two minutes total.</p>
+                      <p className="apply-subtitle">Pick one, then add a few details — about two minutes total.</p>
                     </div>
                     <div className="apply-card-grid apply-card-grid-2 apply-gate-cards">
                       <button
@@ -435,20 +465,52 @@ export default function TermFlow() {
                             {tried && startErrors.lastName && <p className="term-field-error">{startErrors.lastName}</p>}
                           </div>
                         </div>
-                        <div className="apply-field">
-                          <label htmlFor="t-email">{who.isMe ? 'Email' : 'Your email'}</label>
-                          <input id="t-email" type="email" inputMode="email" autoComplete="email" className={`apply-input ${tried && startErrors.email ? 'has-error' : ''}`}
-                            value={data.email} onChange={(e) => update({ email: e.target.value })} />
-                          {!who.isMe && <p className="apply-field-note">Use your own email — you&rsquo;re the one filling this out.</p>}
-                          {tried && startErrors.email && <p className="term-field-error">{startErrors.email}</p>}
+                        <div className="apply-name-row">
+                          <div className="apply-field">
+                            <label htmlFor="t-email">{who.isMe ? 'Email' : 'Your email'}</label>
+                            <input id="t-email" type="email" inputMode="email" autoComplete="email" className={`apply-input ${tried && startErrors.email ? 'has-error' : ''}`}
+                              value={data.email} onChange={(e) => update({ email: e.target.value })} />
+                            {tried && startErrors.email && <p className="term-field-error">{startErrors.email}</p>}
+                          </div>
+                          <div className="apply-field">
+                            <label htmlFor="t-phone">
+                              {who.isMe ? 'Mobile number' : 'Your mobile number'} <span className="term-optional">(optional)</span>
+                            </label>
+                            <input id="t-phone" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(555) 555-5555"
+                              className={`apply-input ${tried && startErrors.phone ? 'has-error' : ''}`}
+                              value={data.phone} onChange={(e) => update({ phone: maskPhone(e.target.value) })} />
+                            {tried && startErrors.phone && <p className="term-field-error">{startErrors.phone}</p>}
+                          </div>
                         </div>
-                        <div className="apply-field term-field-zip">
-                          <label htmlFor="t-zip">{who.isMe ? 'ZIP code' : 'ZIP code where they live'}</label>
-                          <input id="t-zip" inputMode="numeric" autoComplete={who.isMe ? 'postal-code' : 'off'} placeholder="72201" maxLength={5}
-                            className={`apply-input ${tried && startErrors.zip ? 'has-error' : ''}`}
-                            value={data.zip} onChange={(e) => update({ zip: e.target.value.replace(/\D/g, '').slice(0, 5) })} />
-                          {tried && startErrors.zip && <p className="term-field-error">{startErrors.zip}</p>}
+                        {!who.isMe && <p className="apply-field-note term-helper-note">Use your own email and number — you&rsquo;re the one filling this out.</p>}
+                        <div className="apply-name-row term-row-keep">
+                          <div className="apply-field">
+                            <label htmlFor="t-dob">{who.isMe ? 'Date of birth' : 'Their date of birth'}</label>
+                            <input id="t-dob" inputMode="numeric" autoComplete={who.isMe ? 'bday' : 'off'} placeholder="MM/DD/YYYY"
+                              className={`apply-input ${dobErr || (tried && startErrors.dob) ? 'has-error' : ''}`}
+                              value={data.dob} onChange={(e) => update({ dob: maskDob(e.target.value) })} />
+                            {(dobErr || (tried && startErrors.dob)) && <p className="term-field-error">{dobErr || startErrors.dob}</p>}
+                          </div>
+                          <div className="apply-field">
+                            <label htmlFor="t-zip">{who.isMe ? 'ZIP code' : 'ZIP code where they live'}</label>
+                            <input id="t-zip" inputMode="numeric" autoComplete={who.isMe ? 'postal-code' : 'off'} placeholder="72201" maxLength={5}
+                              className={`apply-input ${tried && startErrors.zip ? 'has-error' : ''}`}
+                              value={data.zip} onChange={(e) => update({ zip: e.target.value.replace(/\D/g, '').slice(0, 5) })} />
+                            {tried && startErrors.zip && <p className="term-field-error">{startErrors.zip}</p>}
+                          </div>
                         </div>
+                        {phoneDigits(data.phone).length === 10 && (
+                          <label className="apply-checkbox-row">
+                            <input
+                              type="checkbox"
+                              checked={data.wantsTexts}
+                              onChange={(e) => update({ wantsTexts: e.target.checked, consentAt: e.target.checked ? new Date().toISOString() : null })}
+                            />
+                            <span>
+                              <strong>Optional:</strong> {CONSENT_WORDING}
+                            </span>
+                          </label>
+                        )}
                         <div className="term-contact-notice" role="note">
                           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                             <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
@@ -545,80 +607,17 @@ export default function TermFlow() {
                 {step.id === 'tobacco' && (
                   <>
                     <div className="apply-step-heading">
-                      <div className="apply-eyebrow">Health basics</div>
+                      <div className="apply-eyebrow">Last question</div>
                       <h1>{who.isMe ? 'Have you' : `Has ${who.name}`} used tobacco or nicotine in the last 2 years?</h1>
-                      <p className="apply-subtitle">Cigarettes, vapes, cigars, chew or nicotine pouches.</p>
-                    </div>
-                    <div className="apply-choice-list">
-                      <Choice selected={data.tobacco === 'no'} onClick={() => choose({ tobacco: 'no' })} title="No" body="Non-tobacco rates" />
-                      <Choice selected={data.tobacco === 'yes'} onClick={() => choose({ tobacco: 'yes' })} title="Yes" body="Tobacco rates apply — options are still available" />
-                    </div>
-                  </>
-                )}
-
-                {step.id === 'dob' && (
-                  <>
-                    <div className="apply-step-heading">
-                      <div className="apply-eyebrow">{who.isMe ? 'About you' : `About ${who.name}`}</div>
-                      <h1>What&rsquo;s {who.possessive} date of birth?</h1>
-                      <p className="apply-subtitle">Age is the biggest factor in your price.</p>
-                    </div>
-                    <div className="apply-field term-field-md">
-                      <label htmlFor="t-dob">Date of birth</label>
-                      <input
-                        id="t-dob"
-                        className={`apply-input term-input-lg ${dobErr || (tried && !parseDob(data.dob)) ? 'has-error' : ''}`}
-                        inputMode="numeric"
-                        autoComplete="bday"
-                        placeholder="MM/DD/YYYY"
-                        autoFocus
-                        value={data.dob}
-                        onChange={(e) => update({ dob: maskDob(e.target.value) })}
-                      />
-                      {(dobErr || (tried && !parseDob(data.dob))) && (
-                        <p className="term-field-error">{dobErr || 'Enter your date of birth as MM/DD/YYYY.'}</p>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {step.id === 'phone' && (
-                  <>
-                    <div className="apply-step-heading">
-                      <div className="apply-eyebrow">Last step</div>
-                      <h1>What&rsquo;s the best number to reach you?</h1>
                       <p className="apply-subtitle">
-                        Optional, but it&rsquo;s the fastest way to get {who.isMe ? 'your' : 'the'} real price. We&rsquo;ll also send options to {data.email.trim() || 'your email'}.
+                        Cigarettes, vapes, cigars, chew or nicotine pouches. Your answer sends your request to a licensed agent.
                       </p>
                     </div>
-                    <div className="term-contact-notice" role="note">
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                        <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
-                        <path d="M8 7v4M8 5h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                      </svg>
-                      <span>
-                        {CONTACT_NOTICE} <a href="/data-use#term">Learn more</a>
-                      </span>
+                    <div className="apply-choice-list" aria-busy={sending}>
+                      <Choice selected={data.tobacco === 'no'} onClick={() => !sending && choose({ tobacco: 'no' })} title="No" body="Non-tobacco rates" />
+                      <Choice selected={data.tobacco === 'yes'} onClick={() => !sending && choose({ tobacco: 'yes' })} title="Yes" body="Tobacco rates apply — options are still available" />
                     </div>
-                    <div className="apply-field term-field-md">
-                      <label htmlFor="t-phone">{who.isMe ? 'Mobile number' : 'Your mobile number'} <span className="term-optional">(optional)</span></label>
-                      <input id="t-phone" type="tel" inputMode="tel" autoComplete="tel-national" placeholder="(555) 555-5555" autoFocus
-                        className={`apply-input term-input-lg ${tried && phoneError ? 'has-error' : ''}`}
-                        value={data.phone} onChange={(e) => update({ phone: maskPhone(e.target.value) })} />
-                      {tried && phoneError && <p className="term-field-error">{phoneError}</p>}
-                    </div>
-                    {phoneDigits(data.phone).length === 10 && (
-                      <label className="apply-checkbox-row">
-                        <input
-                          type="checkbox"
-                          checked={data.wantsTexts}
-                          onChange={(e) => update({ wantsTexts: e.target.checked, consentAt: e.target.checked ? new Date().toISOString() : null })}
-                        />
-                        <span>
-                          <strong>Optional:</strong> {CONSENT_WORDING}
-                        </span>
-                      </label>
-                    )}
+                    {sending && <p className="term-sending" role="status">Sending your request…</p>}
                     {error && <div className="apply-error" role="alert">{error}</div>}
                   </>
                 )}
@@ -629,10 +628,12 @@ export default function TermFlow() {
                   ) : (
                     <Link href="/term" className="apply-nav-back">← Back</Link>
                   )}
-                  {step.id === 'phone' ? (
-                    <button type="submit" className="btn btn-brass term-cta" disabled={submitting || checking}>
-                      {submitting ? 'Sending…' : checking ? 'Securing…' : data.phone ? 'Get my options →' : 'Skip — email my options →'}
-                    </button>
+                  {isLast ? (
+                    data.tobacco && !sending && (
+                      <button type="submit" className="btn btn-brass term-cta">
+                        {error ? 'Try again →' : 'Get my options →'}
+                      </button>
+                    )
                   ) : (
                     !step.auto && (
                       <button type="submit" className="btn btn-brass term-cta">
@@ -642,7 +643,7 @@ export default function TermFlow() {
                   )}
                 </div>
 
-                {step.id === 'phone' && (
+                {(isLast || step.id === 'start') && (
                   <p className="term-privacy">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                       <rect x="2" y="5.2" width="8" height="5.8" rx="1.2" stroke="currentColor" strokeWidth="1.2" />

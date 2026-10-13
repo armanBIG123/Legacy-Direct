@@ -34,7 +34,7 @@ const ICONS = {
 };
 
 const HOW = [
-  { t: 'Tap what you want to protect', b: 'Then answer 5 quick questions — about two minutes.' },
+  { t: 'Tap what you want to protect', b: 'Add a few details, then answer 3 quick questions — about two minutes.' },
   { t: 'See your starting coverage', b: `Sized to your income (${INCOME_MULTIPLE}×) or your mortgage balance.` },
   { t: 'Finish with a real, licensed agent', b: 'Start online, then an agent compares insurers and gets you exact prices. No obligation.' },
 ];

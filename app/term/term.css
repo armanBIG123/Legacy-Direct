@@ -823,3 +823,13 @@
   cursor: pointer;
 }
 .term-change-link:hover { color: var(--ink); }
+.term-helper-note { margin: -6px 0 14px; }
+.term-sending {
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.apply-choice-list[aria-busy='true'] { opacity: 0.6; pointer-events: none; }
+@media (max-width: 720px) {
+  .apply-name-row.term-row-keep { grid-template-columns: 1.25fr 1fr; gap: 10px; }
+}
