@@ -224,3 +224,15 @@ footer{ background: var(--ink); color: #AEB6C7; padding: 70px 0 34px; }
   .reveal{ transition:none; opacity:1; transform:none; }
   .btn:hover{ transform:none; }
 }
+
+/* ---- Oct 13 compliance pass ---- */
+.policy-card-body .plan-name{ margin-bottom: 2px; }
+.policy-card-body .plan-type{ font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+.segment-card sup, .footer-disclosures sup{ font-size: 0.7em; line-height: 0; }
+.footer-disclosures{ font-size: 12px; color: #8791A5; line-height: 1.6; max-width: 900px; padding-top: 26px; border-top: 1px solid var(--rule-on-ink); }
+.footer-disclosures p{ margin: 0 0 10px; }
+.footer-disclosures strong{ color: #AEB6C7; }
+.footer-bottom a{ color: #AEB6C7; text-decoration: underline; }
+.footer-col a{ color: inherit; }
+footer .logo-word{ color: var(--paper); }
+footer .logo-word b{ color: var(--brass-light); }

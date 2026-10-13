@@ -12,6 +12,8 @@ import { NEEDS, INCOME_MULTIPLE, AGENT_PHONE_DISPLAY, suggestedCoverage, formatM
 import { sendSnapshot, submitTermLead, hasAnyAnswer, hasContact, parseDob, ageFrom, phoneDigits } from './submitTermLead';
 import { captureAttribution } from './attribution';
 import { trackEvent } from './track';
+import { LegalLinks, AgreeLine } from '../legal/AgencyLine';
+import { LIVING_BENEFITS_DISCLOSURE } from '../legal/disclosures';
 
 const INITIAL = {
   coverageFor: null, // 'me' | 'someone-else'
@@ -650,9 +652,10 @@ export default function TermFlow() {
                       <path d="M4 5.2V3.8a2 2 0 0 1 4 0v1.4" stroke="currentColor" strokeWidth="1.2" />
                     </svg>{' '}
                     Your information is encrypted and only used to help with your coverage.{' '}
-                    <a href="/data-use">Details</a>
+                    <a href="/privacy">Details</a>
                   </p>
                 )}
+                {step.id === 'start' && <AgreeLine className="term-agree" />}
 
                 <div className="term-inline-call">
                   <span>Rather talk it through?</span>
@@ -681,11 +684,10 @@ export default function TermFlow() {
       <footer className="apply-footer">
         <div className="apply-footer-inner">
           <span>
-            Term life insurance provides coverage for a set period. Living benefit riders vary by
-            insurer and state and may have limits. Applying doesn&rsquo;t start coverage — the
-            insurance company decides.
+            Term life insurance provides coverage for a set period and has no cash value. Applying
+            doesn&rsquo;t start coverage — the insurance company decides. {LIVING_BENEFITS_DISCLOSURE}
           </span>
-          <a href="/data-use">How application information is used</a>
+          <LegalLinks />
         </div>
       </footer>
     </div>

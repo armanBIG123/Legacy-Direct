@@ -4,8 +4,8 @@ import { recommendPlan, who } from './planSuggestion';
 
 const NEXT_STEPS = [
   {
-    title: 'An advisor reviews your answers',
-    body: 'A licensed LegacyDirect advisor looks over everything you shared.',
+    title: 'An agent reviews your answers',
+    body: 'A licensed LegacyDirect agent looks over everything you shared.',
   },
   {
     title: 'You talk it through together',
@@ -31,7 +31,7 @@ export default function DoneScreen({ data, onStartOver }) {
       </div>
       <h1 className="done-title">You&rsquo;re all set{w.isMe && data.applicantFirstName ? `, ${data.applicantFirstName}` : ''}.</h1>
       <p className="done-lede">
-        Your answers were sent to a licensed LegacyDirect advisor, who will follow up at{' '}
+        Your answers were sent to a licensed LegacyDirect agent, who will follow up at{' '}
         <strong>{email || 'the email you gave us'}</strong>
         {data.mobile ? <> or {data.mobile}</> : null}.
       </p>

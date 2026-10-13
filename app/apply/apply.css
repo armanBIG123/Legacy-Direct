@@ -1203,3 +1203,20 @@
     line-height: 1.35;
   }
 }
+
+/* "By continuing, you agree to…" under the main button */
+.apply-agree {
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: var(--muted);
+  text-align: right;
+}
+.apply-agree a { color: var(--muted); text-decoration: underline; }
+@media (max-width: 720px) { .apply-agree { text-align: left; } }
+.fit-type {
+  font-size: 13px;
+  color: var(--muted);
+  margin: -6px 0 18px;
+}
+.fit-disclosure p { margin: 0 0 8px; }
+.fit-disclosure p:last-child { margin-bottom: 0; }

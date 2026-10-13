@@ -1,11 +1,13 @@
 import Reveal from './Reveal';
 
+// Every milestone is a documented historical fact (sources in the chart note).
+// No statistics here: ad rules require a named source for any statistic.
 const milestones = [
-  { year: '1759', val: '~300', cap: 'families' },
-  { year: '1875', val: '~1M', cap: 'policies' },
-  { year: '1901', val: '~14M', cap: 'policies' },
-  { year: '2010s', val: '~140M', cap: 'insured' },
-  { year: '2026', val: '~260M', cap: 'policies' },
+  { year: '1759', val: 'First', cap: 'U.S. life insurer, Philadelphia' },
+  { year: '1843', val: 'Mutual', cap: 'policyholder-owned insurers grow' },
+  { year: '1875', val: 'Working', cap: 'families get coverage' },
+  { year: '1945', val: 'States', cap: 'confirmed as insurance regulators' },
+  { year: 'Today', val: 'You', cap: 'compare options in minutes' },
 ];
 
 export default function Timeline() {
@@ -13,11 +15,11 @@ export default function Timeline() {
     <section className="timeline" id="history">
       <div className="container">
         <Reveal className="section-head">
-          <div className="eyebrow on-ink">Track record</div>
-          <h2>150 years of American life insurance</h2>
+          <div className="eyebrow on-ink">A long history</div>
+          <h2>More than 260 years of American life insurance</h2>
           <p>
-            The category LegacyDirect was built to make simpler — from a handful of mutual
-            societies to hundreds of millions of policyholders.
+            The category LegacyDirect was built to make simpler — from a church fund for
+            ministers&apos; families to coverage for families across the country.
           </p>
         </Reveal>
 
@@ -65,8 +67,10 @@ export default function Timeline() {
           </div>
 
           <div className="chart-note">
-            Sources: ACLI Life Insurers Fact Book and industry estimates. Figures are
-            illustrative of long-term category growth, not LegacyDirect-specific data.
+            Milestones: Corporation for Relief of Poor and Distressed Widows and Children of
+            Presbyterian Ministers (incorporated 1759); Mutual Life Insurance Company of New York
+            (1843); Prudential Friendly Society&apos;s industrial policies (1875); McCarran-Ferguson
+            Act (1945). The curve is illustrative, not to scale, and isn&apos;t LegacyDirect data.
           </div>
         </Reveal>
       </div>

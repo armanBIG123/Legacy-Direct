@@ -12,9 +12,9 @@ export const NEEDS = {
   living: {
     key: 'living',
     title: 'Living benefits',
-    tag: 'Income replacement',
+    tag: 'Income protection',
     short: 'Protect your paycheck',
-    body: 'If a serious illness or injury keeps you from working, living benefits let you use part of your coverage while you’re alive — to keep the bills paid.',
+    body: 'Coverage sized to replace your income for your family — and, with living benefit riders, the option to use part of it early if you’re diagnosed with a qualifying serious illness.',
     basis: 'income',
   },
   temporary: {
@@ -28,9 +28,9 @@ export const NEEDS = {
   mortgage: {
     key: 'mortgage',
     title: 'Mortgage protection',
-    tag: 'Pays off the house',
+    tag: 'Covers what you owe',
     short: 'Keep the house',
-    body: 'Coverage matched to what you owe on your home, so your family can stay in it no matter what.',
+    body: 'Coverage matched to what you owe on your home, so your family has the money to pay it off if something happens to you.',
     basis: 'mortgage',
   },
 };

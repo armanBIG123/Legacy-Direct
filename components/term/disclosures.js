@@ -2,7 +2,7 @@
 // compliance can review one file. When any wording changes, bump
 // DISCLOSURE_VERSION — it's saved with each lead as proof of exactly what
 // the person was shown.
-export const DISCLOSURE_VERSION = 'term-2026-10-13';
+export const DISCLOSURE_VERSION = 'term-2026-10-13.2';
 
 // Shown before they start answering (landing hero + first question).
 export const SAVE_NOTICE =

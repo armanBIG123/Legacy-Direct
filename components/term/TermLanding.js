@@ -8,6 +8,8 @@ import { NEEDS, INCOME_MULTIPLE } from './termConfig';
 import { captureAttribution } from './attribution';
 import { trackEvent } from './track';
 import { SAVE_NOTICE } from './disclosures';
+import { agencySentence, LegalLinks } from '../legal/AgencyLine';
+import { GENERAL_DISCLOSURE, TERM_DISCLOSURE, LIVING_BENEFITS_DISCLOSURE, COMPENSATION_DISCLOSURE } from '../legal/disclosures';
 
 const ICONS = {
   living: (
@@ -50,11 +52,11 @@ const FAQ = [
   },
   {
     q: 'What are living benefits?',
-    a: 'Riders that let you use part of your coverage while you’re alive if you have a qualifying serious illness, so you can keep paying bills. Availability varies by insurer and state.',
+    a: 'Riders that let you use part of your death benefit early if you’re diagnosed with a qualifying terminal, chronic or critical illness. Using them lowers the amount your family receives, the money may be taxable, and it can affect eligibility for programs like Medicaid. They aren’t disability or long-term care insurance, and availability varies by insurer and state.',
   },
   {
-    q: 'Will I get spammed?',
-    a: 'No. Your information is only used to help with your coverage request, and you choose whether we can text you.',
+    q: 'Will you sell my information or spam me?',
+    a: 'No. We don’t sell your information. A licensed agent contacts you only about the request you started, automated calls and texts are used only if you check the optional consent box, and you can opt out any time — reply STOP or just tell us.',
   },
 ];
 
@@ -162,7 +164,7 @@ export default function TermLanding() {
         </div>
       </section>
 
-      <section className="term-faq">
+      <section className="term-faq" id="faq">
         <div className="term-section-inner term-faq-inner">
           <h2>Common questions</h2>
           {FAQ.map((f) => (
@@ -191,16 +193,15 @@ export default function TermLanding() {
 
       <footer className="term-footer">
         <div className="term-section-inner">
-          <p>
-            Term life insurance provides coverage for a set period of time. Coverage amounts shown are
-            starting points, not quotes; final eligibility and pricing are determined by the insurance
-            company. Living benefit riders vary by insurer and state and may have limits and
-            eligibility requirements.
-          </p>
+          <p><strong>{agencySentence()}</strong></p>
+          <p>{GENERAL_DISCLOSURE}</p>
+          <p>{TERM_DISCLOSURE}</p>
+          <p>{LIVING_BENEFITS_DISCLOSURE}</p>
+          <p>{COMPENSATION_DISCLOSURE}</p>
           <p>
             Looking for permanent coverage with cash value? <Link href="/">See LegacyDirect IUL plans</Link>
             {' · '}
-            <a href="/data-use">How your information is used</a>
+            <LegalLinks />
           </p>
         </div>
       </footer>

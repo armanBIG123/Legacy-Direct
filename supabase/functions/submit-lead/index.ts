@@ -30,7 +30,7 @@ const ALLOWED_FIELDS = [
   'date_of_birth', 'sex', 'height_inches', 'weight_lbs', 'tobacco', 'citizenship',
   'zip', 'monthly_budget', 'timing', 'matched_plan',
   'consent_reminder_email', 'consent_updates_email', 'consent_texts', 'consent_text_wording',
-  'source_url',
+  'consent_recorded_at', 'disclosure_version', 'source_url',
 ];
 
 const TERM_FIELDS = [
@@ -118,6 +118,12 @@ Deno.serve(async (req) => {
     row.user_agent = (req.headers.get('user-agent') ?? '').slice(0, 500);
     // Proof of consent: where the request came from, recorded by the server.
     if (ip) row.ip_address = ip.slice(0, 64);
+    // Consent only counts with a full phone number to apply it to.
+    if (row.consent_texts && !/^\d{10}$/.test(String(row.phone ?? ''))) {
+      row.consent_texts = false;
+      row.consent_text_wording = null;
+      row.consent_recorded_at = null;
+    }
 
     const up = await rest('term_leads?on_conflict=session_id', {
       method: 'POST',
@@ -137,6 +143,14 @@ Deno.serve(async (req) => {
   const lead: Record<string, unknown> = {};
   for (const key of ALLOWED_FIELDS) if (key in input) lead[key] = input[key];
   lead.user_agent = (req.headers.get('user-agent') ?? '').slice(0, 500);
+  if (ip) lead.ip_address = ip.slice(0, 64);
+  // Consent only counts with a full mobile number to apply it to.
+  if (lead.consent_texts && String(lead.contact_mobile ?? '').replace(/\D/g, '').length < 10) {
+    lead.consent_texts = false;
+    lead.consent_text_wording = null;
+    delete lead.consent_recorded_at;
+  }
+  if (lead.consent_recorded_at == null) delete lead.consent_recorded_at; // column default: now()
 
   const email = typeof lead.contact_email === 'string' ? lead.contact_email.trim().toLowerCase() : '';
   if (!email) return reply(origin, 400, { error: 'bad_request' });

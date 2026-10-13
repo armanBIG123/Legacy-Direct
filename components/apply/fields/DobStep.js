@@ -60,7 +60,7 @@ export default function DobStep({ data, update }) {
       </div>
       {dobOutOfRange(data) && (
         <p className="apply-field-note apply-field-note-warn">
-          LegacyDirect plans are available through age 80. An advisor can still talk through options.
+          IUL designs are typically available through age 80. A licensed agent can still talk through options.
         </p>
       )}
     </div>
@@ -77,7 +77,7 @@ function dobOutOfRange(data) {
 }
 
 export function dobIsValid(data) {
-  // Out-of-range ages show a note but don't block continuing — an advisor
+  // Out-of-range ages show a note but don't block continuing — an agent
   // can still follow up. Only require the fields to be filled in.
   return !!(data.dobMonth && data.dobDay && data.dobYear);
 }

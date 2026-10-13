@@ -1,3 +1,13 @@
+import { agencySentence, LegalLinks } from './legal/AgencyLine';
+import {
+  GENERAL_DISCLOSURE,
+  COMPENSATION_DISCLOSURE,
+  IUL_DISCLOSURE,
+  LIVING_BENEFITS_DISCLOSURE,
+  TERM_DISCLOSURE,
+} from './legal/disclosures';
+import { PLAN_NAME_NOTE } from './apply/planSuggestion';
+
 export default function Footer() {
   return (
     <footer>
@@ -24,39 +34,44 @@ export default function Footer() {
           <div className="footer-col">
             <h5>Coverage</h5>
             <ul>
-              <li><a href="#">LegacyDirect Gold IUL</a></li>
-              <li><a href="#">LegacyDirect Freedom IUL</a></li>
-              <li><a href="#">Do I need a medical exam?</a></li>
+              <li><a href="/apply">Comfort &amp; Peace IUL</a></li>
+              <li><a href="/term">Term life coverage</a></li>
+              <li><a href="/term#faq">Do I need a medical exam?</a></li>
             </ul>
           </div>
 
           <div className="footer-col">
             <h5>Learn</h5>
             <ul>
-              <li><a href="#">Insurance guide</a></li>
-              <li><a href="#">Coverage options</a></li>
-              <li><a href="#">FAQs</a></li>
+              <li><a href="/#how">How it works</a></li>
+              <li><a href="/#families">Who it&apos;s for</a></li>
+              <li><a href="/#history">History</a></li>
             </ul>
           </div>
 
           <div className="footer-col">
-            <h5>Company</h5>
+            <h5>Your information</h5>
             <ul>
-              <li><a href="#">About us</a></li>
-              <li><a href="#">For agents</a></li>
+              <li><a href="/privacy">Privacy Policy</a></li>
+              <li><a href="/terms">Terms of Use</a></li>
+              <li><a href="/privacy#choices">Opt out or delete my info</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="footer-legal">
-          LegacyDirect is an application and tracking service, not an insurance company.
-          Starting a plan is not an offer or guarantee of coverage; coverage and pricing are
-          determined by the underwriting insurer.
+        <div className="footer-disclosures">
+          <p><strong>{agencySentence()}</strong></p>
+          <p>{GENERAL_DISCLOSURE}</p>
+          <p><sup>1</sup> {IUL_DISCLOSURE}</p>
+          <p><sup>2</sup> {LIVING_BENEFITS_DISCLOSURE}</p>
+          <p>{TERM_DISCLOSURE}</p>
+          <p>{PLAN_NAME_NOTE}</p>
+          <p>{COMPENSATION_DISCLOSURE}</p>
         </div>
 
         <div className="footer-bottom">
-          <span>© 2026 LegacyDirect. All rights reserved.</span>
-          <span>Template concept — not a licensed insurance offering.</span>
+          <span>© {new Date().getFullYear()} LegacyDirect. All rights reserved.</span>
+          <LegalLinks />
         </div>
       </div>
     </footer>

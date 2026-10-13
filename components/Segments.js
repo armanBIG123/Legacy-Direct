@@ -40,8 +40,8 @@ export default function Segments() {
             </div>
             <h3>Planning for protection</h3>
             <p>
-              Living benefits that let you access part of your coverage while you&apos;re still
-              here, if a serious illness or injury keeps you from earning an income.
+              Living benefits that can let you use part of your death benefit early if
+              you&apos;re diagnosed with a qualifying terminal, chronic or critical illness.<sup>2</sup>
             </p>
           </Reveal>
 
@@ -54,8 +54,9 @@ export default function Segments() {
             </div>
             <h3>Planning for retirement</h3>
             <p>
-              Built-in protection against market downturns, with the potential for tax-free
-              income to supplement whatever you&apos;ve already saved.
+              Cash value that isn&apos;t invested in the market, so index drops don&apos;t reduce
+              your credited interest below 0%, with the potential for tax-advantaged income to
+              supplement what you&apos;ve already saved.<sup>1</sup>
             </p>
           </Reveal>
         </div>

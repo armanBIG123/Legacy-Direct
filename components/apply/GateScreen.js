@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { stateFromZip } from './zipState';
+import { AgreeLine } from '../legal/AgencyLine';
 
 export default function GateScreen({ data, update, onContinue, onBack }) {
   const [touched, setTouched] = useState(false);
@@ -40,7 +41,7 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
       <div className="apply-eyebrow">Before we start</div>
       <h1>Who is this coverage for?</h1>
       <p className="apply-subtitle">
-        Pick one, then add a name, email and ZIP code so you can pick this back up if you step away.
+        Pick one, then add a name, email and ZIP code.
       </p>
 
       <div className="apply-card-grid apply-card-grid-2 apply-gate-cards">
@@ -136,15 +137,6 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
             <p className="apply-field-note">Coverage options vary by state.</p>
           </div>
 
-          <label className="apply-checkbox-row">
-            <input
-              type="checkbox"
-              checked={data.wantsPreviewReminder}
-              onChange={(e) => update({ wantsPreviewReminder: e.target.checked })}
-            />
-            <span>Email me a reminder if I leave before finishing. I can turn this off anytime.</span>
-          </label>
-
           {touched && !canContinue && (
             <p className="apply-field-note apply-field-note-warn">
               Add a first name, last name, a valid email and a 5-digit ZIP code to continue.
@@ -161,6 +153,7 @@ export default function GateScreen({ data, update, onContinue, onBack }) {
           Continue to the questions
         </button>
       </div>
+      <AgreeLine className="apply-agree" />
     </div>
   );
 }

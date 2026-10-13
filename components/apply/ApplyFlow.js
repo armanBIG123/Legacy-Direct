@@ -12,6 +12,7 @@ import ReviewScreen from './ReviewScreen';
 import DoneScreen from './DoneScreen';
 import { visibleSteps } from './quizConfig';
 import { submitLead } from './submitLead';
+import { LegalLinks } from '../legal/AgencyLine';
 
 const INITIAL_DATA = {
   coverageFor: null,
@@ -46,6 +47,7 @@ const INITIAL_DATA = {
   mobile: '',
   wantsEmailUpdates: false,
   wantsTexts: false,
+  consentAt: null, // when the call/text consent box was checked
   website: '', // honeypot — stays empty for real visitors
 };
 
@@ -238,8 +240,12 @@ export default function ApplyFlow() {
 
       <footer className="apply-footer">
         <div className="apply-footer-inner">
-          <span>Applying here does not start coverage. Coverage starts only if and when the insurance company issues your policy.</span>
-          <a href="/data-use">How application information is used</a>
+          <span>
+            LegacyDirect is an insurance agency, not an insurance company. Applying here does not
+            start coverage — coverage starts only if and when the insurance company issues your
+            policy.
+          </span>
+          <LegalLinks />
         </div>
       </footer>
     </div>

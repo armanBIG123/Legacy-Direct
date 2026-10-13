@@ -23,7 +23,7 @@ export default function Hero() {
               <svg width="14" height="14" viewBox="0 0 14 14">
                 <path d="M1 7l4 4 8-8" stroke="#E2C465" strokeWidth="1.6" fill="none" />
               </svg>
-              Look around before signing in
+              Look around first — no account needed
             </div>
             <div className="trust-item">
               <svg width="14" height="14" viewBox="0 0 14 14">
@@ -49,14 +49,15 @@ export default function Hero() {
             <div className="policy-card-body">
               <div className="label">Requested coverage</div>
               <div className="amount">$500,000</div>
-              <div className="plan-name">LegacyDirect Gold IUL</div>
+              <div className="plan-name">LegacyDirect Comfort IUL</div>
+              <div className="plan-type">Indexed universal life insurance design</div>
               <div className="policy-rows">
                 <div className="policy-row"><span>Planned budget</span><span>$3,600 / yr</span></div>
                 <div className="policy-row"><span>Medical exam</span><span>Exam-free possible</span></div>
                 <div className="policy-row"><span>Next action</span><span>Review your plan</span></div>
               </div>
               <div className="policy-foot">
-                Example only — final price and eligibility are confirmed by the insurer.
+                Hypothetical example, not a quote. Final price and eligibility are set by the insurer.
               </div>
             </div>
           </div>

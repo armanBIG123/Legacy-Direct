@@ -5,19 +5,19 @@ const steps = [
     num: '01',
     title: 'Answer a few questions',
     body:
-      "Help us understand what your goals are and where you currently stand. We'll let you know early on if any medical underwriting will be needed to get approved.",
+      "Tell us what you want your coverage to do and where you stand today. Your agent will tell you early on whether the insurer is likely to need medical underwriting.",
   },
   {
     num: '02',
     title: 'Discover your direct option',
     body:
-      'Once you have an idea of what plans are available to you, decide whether to continue on your own or pick up where you left off with a licensed agent to guide you the rest of the way.',
+      'See a starting point built from your answers, then talk it through with a licensed agent who compares options with you and helps you apply — only if you decide to.',
   },
   {
     num: '03',
-    title: 'View the results',
+    title: 'Stay in the loop',
     body:
-      "Get a chance to follow along with the carrier's steps from submission to the final decision. Once approved, the finalized policy will be delivered directly to your home.",
+      "Your agent keeps you updated from application to the insurer's decision. If you're approved, you'll get your policy to review, with a free-look period to cancel for a refund.",
   },
 ];
 

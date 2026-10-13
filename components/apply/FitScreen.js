@@ -1,6 +1,7 @@
 'use client';
 
-import { PLANS, recommendPlan, who } from './planSuggestion';
+import { PLANS, PLAN_NAME_NOTE, recommendPlan, who } from './planSuggestion';
+import { IUL_DISCLOSURE, LIVING_BENEFITS_DISCLOSURE } from '../legal/disclosures';
 
 // Hypothetical index years used only to show how a floor and a cap shape
 // what's credited. Deliberately generic: not a carrier's actual rates and
@@ -66,11 +67,11 @@ const BENEFITS = [
   },
   {
     title: 'Living benefits',
-    body: 'If you’re diagnosed with a qualifying chronic, critical or terminal illness, you can access part of your death benefit while you’re alive. Availability varies by state.',
+    body: 'Riders that can let you use part of your death benefit early if you’re diagnosed with a qualifying chronic, critical or terminal illness. Using them lowers the death benefit. Availability varies by insurer and state.',
   },
   {
     title: 'Cash value you can borrow against',
-    body: 'Policy loans are generally income-tax-free and aren’t subject to early-withdrawal penalties when the policy is set up correctly. Use them for retirement, college or anything else.',
+    body: 'Policy loans are generally income-tax-free while the policy stays in force and isn’t a modified endowment contract (MEC). Loans accrue interest and reduce the death benefit. Use them for retirement, college or anything else.',
   },
 ];
 
@@ -78,19 +79,20 @@ export default function FitScreen({ data, onBack, onContinue }) {
   const rec = recommendPlan(data);
   if (!rec) return null;
   const { plan, reasons } = rec;
-  const other = plan.key === 'gold' ? PLANS.freedom : PLANS.gold;
+  const other = plan.key === 'comfort' ? PLANS.peace : PLANS.comfort;
   const w = who(data);
 
   return (
     <div className="fit">
-      <div className="apply-eyebrow">{w.isMe ? 'Your best fit' : `Best fit for ${w.name}`}</div>
+      <div className="apply-eyebrow">{w.isMe ? 'Your starting point' : `Starting point for ${w.name}`}</div>
       <h1 className="fit-title">
         {plan.name} looks like the right place to start.
       </h1>
       <p className="fit-lede">{plan.tagline}</p>
+      <p className="fit-type">{plan.type} that your licensed agent builds with you.</p>
 
       <div className="fit-why">
-        <div className="fit-why-label">Why we matched {w.isMe ? 'you' : w.name}</div>
+        <div className="fit-why-label">Why we suggest starting here</div>
         <ul>
           {reasons.map((r) => (
             <li key={r}>{r}</li>
@@ -103,18 +105,20 @@ export default function FitScreen({ data, onBack, onContinue }) {
         <p>
           Your cash value earns interest linked to a market index, but it’s never invested in the
           market directly. When the index has a down year, a floor keeps your credited rate from
-          going negative. When it’s up, you share in the gain up to a cap.
+          going below 0%. When it’s up, you share in the gain up to a cap. Policy charges are
+          deducted every month either way, so cash value can still go down.
         </p>
         <CreditingChart />
         <p className="fit-fine">
-          Hypothetical example for illustration only, not a projection of any policy’s
-          performance. Actual caps, floors and participation rates vary by policy and are set by
-          the insurer.
+          Hypothetical example for illustration only — not a policy illustration or a projection
+          of any policy’s performance, and it doesn’t show policy charges. Actual caps, floors and
+          participation rates vary by policy, are set by the insurer and can change. Your agent
+          can provide an insurer illustration showing guaranteed and non-guaranteed values.
         </p>
       </section>
 
       <section className="fit-section">
-        <h2>What every plan includes</h2>
+        <h2>What these designs can include</h2>
         <div className="fit-benefits">
           {BENEFITS.map((b) => (
             <div className="fit-benefit" key={b.title}>
@@ -130,28 +134,25 @@ export default function FitScreen({ data, onBack, onContinue }) {
         <div className="fit-compare">
           {[plan, other].map((p) => (
             <div className={`fit-plan ${p.key === plan.key ? 'is-match' : ''}`} key={p.key}>
-              {p.key === plan.key && <div className="fit-plan-badge">Your match</div>}
+              {p.key === plan.key && <div className="fit-plan-badge">Your starting point</div>}
               <div className="fit-plan-name">{p.name}</div>
               <p className="fit-plan-tag">{p.tagline}</p>
               <div className="fit-plan-row"><span>Best for</span><span>{p.bestFor}</span></div>
-              <div className="fit-plan-row"><span>Ages</span><span>{p.ages}</span></div>
+              <div className="fit-plan-row"><span>Issue ages</span><span>{p.ages}</span></div>
             </div>
           ))}
         </div>
         <p className="fit-fine">
-          Your licensed advisor confirms the right design, coverage amount and funding level with
-          you before anything is submitted.
+          This is a starting point from your answers, not a recommendation. Your licensed agent
+          reviews your needs and confirms the right design, coverage amount and funding level with
+          you before anything is submitted. {PLAN_NAME_NOTE}
         </p>
       </section>
 
       <div className="fit-disclosure">
-        Life insurance is not a bank product, is not FDIC insured and may lose value if
-        surrendered early. Loans and withdrawals reduce cash value and the death benefit, accrue
-        interest, and can cause the policy to lapse. Withdrawals above what you’ve paid in may be
-        taxable and may be penalized before age 59½. Tax-free loan treatment requires that the
-        policy not become a modified endowment contract (MEC). Living benefit riders have
-        eligibility limits and may not be available in all states. This is general education,
-        not tax or legal advice.
+        <p>{IUL_DISCLOSURE}</p>
+        <p>{LIVING_BENEFITS_DISCLOSURE}</p>
+        <p>This is general education, not tax, legal or investment advice. Talk to a tax professional about your situation.</p>
       </div>
 
       <div className="apply-nav">

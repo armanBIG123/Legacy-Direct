@@ -7,7 +7,7 @@ const values = [
   },
   {
     title: 'Leave more behind, not less',
-    body: 'Plans built to grow, so what you leave outpaces what you paid in.',
+    body: 'A death benefit designed to be far larger than the premiums you pay, as long as the policy stays in force.',
   },
   {
     title: "Protect what you've already built",
@@ -19,7 +19,7 @@ const values = [
   },
   {
     title: "Rest easy knowing it's handled",
-    body: "One place to check status, so you're never wondering where an application stands.",
+    body: "A licensed agent keeps you posted, so you're never wondering where an application stands.",
   },
 ];
 
@@ -32,8 +32,8 @@ export default function Values() {
           <h2>The same trust insurance was always meant to run on</h2>
           <div className="values-copy">
             <p>
-              Newer technology, faster tracking, and a much shorter application — built around
-              what actually matters to families.
+              Newer technology, clear answers, and a much simpler start — built around what
+              actually matters to families.
             </p>
           </div>
         </Reveal>

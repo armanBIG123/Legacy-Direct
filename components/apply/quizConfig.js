@@ -87,7 +87,7 @@ export const QUESTION_STEPS = [
     layout: 'cards',
     eyebrow: 'Your goals',
     title: (d) => (who(d).isMe ? 'What do you want your coverage to do?' : `What should ${who(d).poss} coverage do?`),
-    subtitle: 'Most people want a mix. Every plan we offer includes all three — this tells us what to lead with.',
+    subtitle: 'Most people want a mix. An IUL can be designed around all three — this tells us what to lead with.',
     options: opts(LABELS.goals, GOAL_EXTRAS),
   }),
   choice('trigger', {

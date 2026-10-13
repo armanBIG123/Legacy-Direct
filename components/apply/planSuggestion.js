@@ -1,28 +1,37 @@
 // Shared answer labels, formatting, and the plan-matching logic.
 //
-// COMPLIANCE NOTE: nothing in this flow names the issuing insurance carrier
-// or quotes carrier-specific rates (caps, participation rates, loan rates).
-// Those details live in agent-only materials and stay with the licensed
-// advisor. Consumer copy here is general IUL education only.
+// COMPLIANCE NOTE: Comfort and Peace are LegacyDirect's names for two ways a
+// licensed agent can DESIGN an indexed universal life (IUL) insurance policy.
+// They are not insurance products and not tied to one insurer. Nothing in this
+// flow names an insurer or quotes an insurer's rates (caps, participation
+// rates, loan rates) — those stay with the licensed agent, and the issuing
+// insurer is named on the illustration and application. Keep consumer copy
+// generic IUL education (NAIC Advertising Model Reg. #570, sections 5–6).
 
 export const PLANS = {
-  gold: {
-    key: 'gold',
-    name: 'LegacyDirect Gold IUL',
-    short: 'Gold IUL',
+  comfort: {
+    key: 'comfort',
+    name: 'LegacyDirect Comfort IUL',
+    short: 'Comfort IUL',
+    type: 'An indexed universal life insurance design',
     tagline: 'Balanced protection with growth potential, at a lower price point.',
     bestFor: 'Families who want lasting protection first, with cash value building in the background.',
-    ages: 'Available from birth through age 80',
+    ages: 'Typically birth to age 80 (varies by insurer)',
   },
-  freedom: {
-    key: 'freedom',
-    name: 'LegacyDirect Freedom IUL',
-    short: 'Freedom IUL',
-    tagline: 'Built to maximize cash value for retirement income.',
-    bestFor: 'People who want a supplemental, tax-advantaged retirement source and can fund it consistently.',
-    ages: 'Available ages 18 through 80',
+  peace: {
+    key: 'peace',
+    name: 'LegacyDirect Peace IUL',
+    short: 'Peace IUL',
+    type: 'An indexed universal life insurance design',
+    tagline: 'Designed to emphasize cash value growth for supplemental retirement income.',
+    bestFor: 'People who want a supplemental, tax-advantaged income source later in life and can fund it consistently.',
+    ages: 'Typically ages 18 to 80 (varies by insurer)',
   },
 };
+
+// Shown wherever the plan names appear prominently.
+export const PLAN_NAME_NOTE =
+  'Comfort IUL and Peace IUL are LegacyDirect’s names for two ways your agent can design an indexed universal life insurance policy. They are not insurance companies or insurer product names. Your policy is issued by an insurance company, which is named on your illustration and application.';
 
 export const LABELS = {
   goals: {
@@ -101,9 +110,9 @@ export function formatMoney(n) {
   return `$${Math.round(n).toLocaleString('en-US')}`;
 }
 
-// Picks Gold or Freedom from the answers and explains why, in plain words.
-// Gold: balanced protection + accumulation, lower cost, juveniles welcome.
-// Freedom: cash-value/retirement focus, ages 18+, meant to be funded at or
+// Picks Comfort or Peace from the answers and explains why, in plain words.
+// Comfort: balanced protection + accumulation, lower cost, juveniles welcome.
+// Peace: cash-value/retirement focus, ages 18+, meant to be funded at or
 // above target — so it needs both a retirement goal and room in the budget.
 export function recommendPlan(data) {
   const goals = data.goals || [];
@@ -117,25 +126,25 @@ export function recommendPlan(data) {
   const reasons = [];
 
   if (age !== null && age < 18) {
-    reasons.push(`It can start in childhood — ${PLANS.gold.ages.toLowerCase()}.`);
-    reasons.push('Early coverage locks in insurability and gives cash value decades to grow.');
-    return { plan: PLANS.gold, reasons };
+    reasons.push(`It can start in childhood — ${PLANS.comfort.ages.toLowerCase()}.`);
+    reasons.push('Starting while they’re young and healthy can secure coverage early and gives cash value more time to grow.');
+    return { plan: PLANS.comfort, reasons };
   }
 
   if (wantsRetirement && (budgetHigh || (!wantsLegacy && !budgetLow))) {
     reasons.push('You told us growing money for retirement is a priority.');
     if (budgetHigh) reasons.push('Your budget leaves room to fund the policy at the higher levels this plan is designed for.');
-    if (data.trigger === 'retirement') reasons.push("You're already planning for retirement — this adds a tax-advantaged income source alongside a 401(k) or IRA.");
-    reasons.push('You still get a lifelong death benefit and living benefits built in.');
-    return { plan: PLANS.freedom, reasons };
+    if (data.trigger === 'retirement') reasons.push("You're already planning for retirement — cash value can add a supplemental, tax-advantaged income source alongside a 401(k) or IRA. It doesn't replace them.");
+    reasons.push('You still get a death benefit that lasts as long as the policy stays in force, plus living benefit riders where available.');
+    return { plan: PLANS.peace, reasons };
   }
 
   if (wantsLegacy || goals.includes('living')) reasons.push('Protecting the people who depend on you comes first in your answers.');
-  if ((data.dependents || []).some((d) => d !== 'none')) reasons.push('People depend on your income — this keeps them covered for life, not just a set term.');
+  if ((data.dependents || []).some((d) => d !== 'none')) reasons.push('People depend on your income — this is designed to keep them covered for life, not just a set term, as long as the policy stays in force.');
   if (budgetLow) reasons.push('It delivers permanent coverage at a lower price point than a cash-value-maximizing design.');
   if (wantsRetirement) reasons.push('Cash value still builds over time, so retirement access is there as a bonus.');
   if (reasons.length === 0) reasons.push('It balances lasting protection with growth potential — a strong default while you decide.');
-  return { plan: PLANS.gold, reasons };
+  return { plan: PLANS.comfort, reasons };
 }
 
 // Back-compat helper used by the summary panel and review card.

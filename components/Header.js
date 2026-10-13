@@ -37,11 +37,10 @@ export default function Header() {
               <li><a href="/term" onClick={closeMenu}>Term coverage</a></li>
               <li><a href="/#families" onClick={closeMenu}>Who it&apos;s for</a></li>
               <li><a href="/#values" onClick={closeMenu}>Our approach</a></li>
-              <li><a href="/#history" onClick={closeMenu}>Track record</a></li>
+              <li><a href="/#history" onClick={closeMenu}>History</a></li>
             </ul>
           </nav>
           <div className="nav-cta">
-            <a href="#" className="sign-in-link" onClick={closeMenu} title="Accounts are coming soon">Sign in</a>
             <a
               href="/apply"
               className="btn"

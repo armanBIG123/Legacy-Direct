@@ -1,6 +1,14 @@
 'use client';
 
-import { TEXT_CONSENT_WORDING } from './submitLead';
+import { TEXT_CONSENT_WORDING, mobileDigits } from './submitLead';
+
+// "5015551212" → "(501) 555-1212"
+function maskPhone(v) {
+  const d = mobileDigits(v).slice(0, 10);
+  if (d.length < 4) return d;
+  if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+}
 
 export default function ContactScreen({ data, update, onContinue, onBack, onEdit }) {
   const isMe = data.coverageFor === 'me';
@@ -13,7 +21,7 @@ export default function ContactScreen({ data, update, onContinue, onBack, onEdit
     <div className="apply-bookend apply-bookend-wide">
       <div className="apply-eyebrow">Last step</div>
       <h1>How should we reach you?</h1>
-      <p className="apply-subtitle">A licensed advisor will use this to follow up. It won&rsquo;t change your match.</p>
+      <p className="apply-subtitle">A licensed agent will use this to follow up. It won&rsquo;t change your match.</p>
 
       <div className="apply-contact-summary">
         <div>
@@ -33,11 +41,16 @@ export default function ContactScreen({ data, update, onContinue, onBack, onEdit
         <label>Mobile number (optional)</label>
         <input
           type="tel"
+          inputMode="tel"
+          autoComplete="tel-national"
           className="apply-input"
           placeholder="(555) 555-5555"
           value={data.mobile}
-          onChange={(e) => update({ mobile: e.target.value })}
+          onChange={(e) => update({ mobile: maskPhone(e.target.value) })}
         />
+        {data.mobile && mobileDigits(data.mobile).length !== 10 && (
+          <p className="apply-field-note">Enter a 10-digit number, or leave it blank.</p>
+        )}
       </div>
 
       <label className="apply-checkbox-row">
@@ -49,17 +62,21 @@ export default function ContactScreen({ data, update, onContinue, onBack, onEdit
         <span>Email me updates about my plan and coverage options. I can unsubscribe at any time.</span>
       </label>
 
-      <label className="apply-checkbox-row">
-        <input
-          type="checkbox"
-          checked={data.wantsTexts}
-          onChange={(e) => update({ wantsTexts: e.target.checked })}
-        />
-        <span>{TEXT_CONSENT_WORDING}</span>
-      </label>
+      {mobileDigits(data.mobile).length === 10 && (
+        <label className="apply-checkbox-row">
+          <input
+            type="checkbox"
+            checked={data.wantsTexts}
+            onChange={(e) => update({ wantsTexts: e.target.checked, consentAt: e.target.checked ? new Date().toISOString() : null })}
+          />
+          <span>
+            <strong>Optional:</strong> {TEXT_CONSENT_WORDING}
+          </span>
+        </label>
+      )}
 
       <p className="apply-bookend-fine">
-        Next, you&rsquo;ll review your answers and send them to a licensed advisor, who walks
+        Next, you&rsquo;ll review your answers and send them to a licensed agent, who walks
         through everything with you before anything goes to an insurance company.
       </p>
 
@@ -81,7 +98,12 @@ export default function ContactScreen({ data, update, onContinue, onBack, onEdit
         <button type="button" className="apply-nav-back" onClick={onBack}>
           Back
         </button>
-        <button type="button" className="btn btn-brass" onClick={onContinue}>
+        <button
+          type="button"
+          className="btn btn-brass"
+          disabled={!!data.mobile && mobileDigits(data.mobile).length !== 10}
+          onClick={onContinue}
+        >
           Review my answers
         </button>
       </div>

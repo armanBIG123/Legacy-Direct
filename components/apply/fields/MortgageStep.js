@@ -37,7 +37,7 @@ export default function MortgageStep({ data, update }) {
       </div>
       <p className="apply-field-note">
         A mortgage is often the biggest bill a family would face without you. Knowing it helps
-        your advisor size coverage that keeps the house.
+        your agent size coverage that keeps the house.
       </p>
     </div>
   );

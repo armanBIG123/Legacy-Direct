@@ -1,10 +1,16 @@
 import { SUPABASE_ANON_KEY, SUBMIT_URL, leadsConfigured } from './leadConfig';
 import { recommendPlan } from './planSuggestion';
+import { CONSENT_WORDING } from '../term/disclosures';
 
-// Exact wording shown next to the text-message checkbox. Stored with each
-// lead so there's a record of precisely what the person agreed to.
-export const TEXT_CONSENT_WORDING =
-  'Text me about this request, including automated or prerecorded messages. Consent isn’t required to buy anything. Message and data rates may apply.';
+// Exact wording shown next to the call/text consent checkbox — the same
+// wording as the term quiz, so both funnels collect the same consent. Stored
+// with each lead as a record of precisely what the person agreed to.
+export const TEXT_CONSENT_WORDING = CONSENT_WORDING;
+
+// Bump when any notice shown in the IUL quiz changes. Saved on every lead.
+export const IUL_DISCLOSURE_VERSION = 'iul-2026-10-13';
+
+export const mobileDigits = (p) => (p || '').replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
 
 function pad(n) {
   return String(n).padStart(2, '0');
@@ -19,13 +25,15 @@ export function buildLeadRow(data) {
       ? `${data.dobYear}-${pad(data.dobMonth)}-${pad(data.dobDay)}`
       : null;
   const clean = (s, max) => (s ? String(s).trim().slice(0, max) : null);
+  // Consent only counts with a full mobile number to apply it to.
+  const textsConsented = !!data.wantsTexts && mobileDigits(data.mobile).length === 10;
 
   return {
     coverage_for: data.coverageFor,
     insured_first_name: clean(isMe ? data.applicantFirstName : data.subjectFirstName, 80),
     insured_last_name: clean(isMe ? data.applicantLastName : data.subjectLastName, 80),
     contact_email: clean(isMe ? data.applicantEmail : data.yourEmail, 200),
-    contact_mobile: clean(data.mobile, 30),
+    contact_mobile: mobileDigits(data.mobile).length === 10 ? mobileDigits(data.mobile) : clean(data.mobile, 30),
 
     goals: data.goals || [],
     trigger_reason: data.trigger,
@@ -46,8 +54,11 @@ export function buildLeadRow(data) {
 
     consent_reminder_email: !!data.wantsPreviewReminder,
     consent_updates_email: !!data.wantsEmailUpdates,
-    consent_texts: !!data.wantsTexts,
-    consent_text_wording: data.wantsTexts ? TEXT_CONSENT_WORDING : null,
+    consent_texts: textsConsented,
+    consent_text_wording: textsConsented ? TEXT_CONSENT_WORDING : null,
+    // When the box was checked (the column's default is the submit time).
+    ...(textsConsented && data.consentAt ? { consent_recorded_at: data.consentAt } : {}),
+    disclosure_version: IUL_DISCLOSURE_VERSION,
 
     source_url: typeof window !== 'undefined' ? window.location.href.slice(0, 500) : null,
     user_agent: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 500) : null,

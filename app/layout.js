@@ -9,7 +9,7 @@ const FONTS_URL =
 export const metadata = {
   title: 'LegacyDirect — Direct protection for you and your family',
   description:
-    'See your coverage options for legacy, income protection, and retirement, and follow your application straight through to the insurer decision.',
+    'See your life insurance options for legacy, income protection and retirement, then talk it through with a licensed agent.',
 };
 
 // The marketing header and footer live on the homepage itself, so the
