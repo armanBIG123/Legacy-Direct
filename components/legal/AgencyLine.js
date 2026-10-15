@@ -1,4 +1,5 @@
 import { AGENCY } from './agency';
+import AdChoicesLink from '../tracking/AdChoicesLink';
 
 // "LegacyDirect is a trade name of X, a licensed insurance agency (NPN …)."
 // Falls back to a plain agency statement until agency.js is filled in.
@@ -15,7 +16,7 @@ export default function AgencyLine({ className }) {
   return <p className={className}>{agencySentence()}</p>;
 }
 
-// Privacy · Terms · Opt out — for every footer.
+// Privacy · Terms · Opt out · Ad tracking choices — for every footer.
 export function LegalLinks({ className, separator = ' · ' }) {
   const links = [
     ['/privacy', 'Privacy Policy'],
@@ -30,6 +31,8 @@ export function LegalLinks({ className, separator = ' · ' }) {
           <a href={href}>{label}</a>
         </span>
       ))}
+      {separator}
+      <AdChoicesLink />
     </span>
   );
 }

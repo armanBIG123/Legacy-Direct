@@ -32,4 +32,4 @@ export const AGENCY = {
 export const agencyConfigured = !!(AGENCY.legalName && AGENCY.npn && AGENCY.address && AGENCY.licensedStates.length);
 
 // When the notices on the privacy and terms pages last changed.
-export const LEGAL_EFFECTIVE_DATE = 'October 13, 2026';
+export const LEGAL_EFFECTIVE_DATE = 'October 15, 2026';

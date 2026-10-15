@@ -13,6 +13,7 @@ import DoneScreen from './DoneScreen';
 import { visibleSteps } from './quizConfig';
 import { submitLead } from './submitLead';
 import { LegalLinks } from '../legal/AgencyLine';
+import { trackEvent } from '../term/track';
 
 const INITIAL_DATA = {
   coverageFor: null,
@@ -132,6 +133,7 @@ export default function ApplyFlow() {
     setSubmitError('');
     try {
       await submitLead(data, turnstileToken);
+      trackEvent('iul_lead');
       setStage('done');
       scrollTop();
     } catch (err) {

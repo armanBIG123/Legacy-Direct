@@ -3,6 +3,7 @@ import { agencySentence } from './AgencyLine';
 import { COMPENSATION_DISCLOSURE } from './disclosures';
 import { AGENT_PHONE_DISPLAY, phoneConfigured } from '../term/termConfig';
 import { CONSENT_WORDING, DISCLOSURE_VERSION } from '../term/disclosures';
+import AdChoicesLink from '../tracking/AdChoicesLink';
 
 // The full privacy policy. Rendered at /privacy and /data-use (older links
 // point there, including /data-use#term), so section ids must stay stable.
@@ -42,6 +43,7 @@ export default function PrivacyPolicy() {
         <a href="#call">When you tap Call</a>
         <a href="#use">How we use it</a>
         <a href="#share">Who we share it with</a>
+        <a href="#tracking">Ad tracking</a>
         <a href="#contact">Calls, texts and email</a>
         <a href="#choices">Your choices</a>
         <a href="#retention">How long we keep it</a>
@@ -69,7 +71,17 @@ export default function PrivacyPolicy() {
           address you used, the site that referred you, any ad-campaign tags or click IDs in the link
           you followed (for example utm_campaign, gclid or fbclid), and the time of each save. Campaign
           details are kept in your browser&rsquo;s session storage, which clears when you close the
-          tab. We don&rsquo;t use advertising cookies, analytics trackers or session-recording tools.
+          tab. We don&rsquo;t use session-recording tools.
+        </p>
+        <p>
+          <strong>Meta Pixel, only if you allow it.</strong> If you tap &ldquo;Allow&rdquo; in our
+          ad-tracking banner, the Meta Pixel (from Meta Platforms, which runs Facebook and Instagram)
+          loads and uses cookies to collect information about your visit — the pages you view, the
+          address of each page, your browser, device and IP address, and three events: viewing a page,
+          finishing a questionnaire, and tapping Call. Meta may connect this with information it
+          already has about you to measure our ads and decide who sees them. We don&rsquo;t send Meta
+          your answers, name, email or phone number. If you choose &ldquo;No thanks,&rdquo; or your
+          browser sends a Global Privacy Control signal, the pixel doesn&rsquo;t load.
         </p>
         <p>
           <strong>When you call us.</strong> Your phone number and notes the agent takes about your
@@ -128,14 +140,20 @@ export default function PrivacyPolicy() {
           Fonts (delivers the site&rsquo;s typefaces, which shares your IP address with Google).
         </p>
         <p>
+          <strong>Meta, only if you allow it</strong>, through the Meta Pixel described above. Meta
+          uses that information under its own privacy policy, including to measure and target ads.
+        </p>
+        <p>
           <strong>When the law requires it</strong> — for example, to respond to a regulator, a court
           order or to protect against fraud — or as part of a sale or merger of our business, in which
           case this policy continues to apply.
         </p>
         <p>
-          <strong>We do not sell your personal information</strong>, and we don&rsquo;t share it with
-          other companies for their own marketing or for targeted advertising. No mobile information
-          will be shared with third parties or affiliates for marketing or promotional purposes.
+          <strong>We do not sell your personal information.</strong> Some state laws treat the Meta
+          Pixel as &ldquo;sharing&rdquo; for targeted advertising; it only runs if you allow it, and you
+          can turn it off at any time (see <a href="#tracking">Ad tracking</a>). We don&rsquo;t share
+          your information with other companies for their own marketing. No mobile information will
+          be shared with third parties or affiliates for marketing or promotional purposes.
           Text-message opt-in data and consent are never shared with any third party.
         </p>
       </Section>
@@ -172,21 +190,29 @@ export default function PrivacyPolicy() {
         <p>
           <strong>State privacy rights.</strong> Depending on where you live, state law may give you
           additional rights, such as the right to know, correct or delete personal information, or to
-          opt out of its sale or use for targeted advertising. We don&rsquo;t sell personal information
-          or use it for targeted advertising. To use any right available to you, {contact}; you may
-          appeal a decision by replying to our response. California residents: we don&rsquo;t share
+          opt out of its sale or use for targeted advertising. We don&rsquo;t sell personal
+          information. To opt out of targeted advertising, choose &ldquo;No thanks&rdquo; in our banner,
+          use the <AdChoicesLink label="Ad tracking choices" /> link at the bottom of any page, or turn
+          on Global Privacy Control in your browser — we treat it as an opt-out. To use any other right
+          available to you, {contact}; you may appeal a decision by replying to our response. California residents: we don&rsquo;t share
           personal information with third parties for their direct-marketing purposes. Nevada
           residents: we don&rsquo;t sell covered information.
         </p>
       </Section>
 
-      <Section id="tracking" title="Do Not Track and online tracking">
+      <Section id="tracking" title="Ad tracking, Do Not Track and Global Privacy Control">
         <p>
-          We don&rsquo;t track you across other websites, and we don&rsquo;t allow other companies to
-          collect information about your activity on our site over time and across other sites. Because
-          of that, our site doesn&rsquo;t change how it works in response to browser &ldquo;Do Not
-          Track&rdquo; signals. If we ever add advertising or analytics tools, we&rsquo;ll update this
-          policy first and ask for your consent where the law requires.
+          The only third-party tracking on this site is the Meta Pixel, and it loads only if you tap
+          &ldquo;Allow&rdquo; in our banner. When it runs, Meta can collect information about your
+          activity on our site over time and connect it with your activity on other sites and apps.
+          Your choice is saved in this browser; change it any time with the{' '}
+          <AdChoicesLink label="Ad tracking choices" /> link at the bottom of every page.
+        </p>
+        <p>
+          We treat a browser&rsquo;s Global Privacy Control signal as &ldquo;No&rdquo; — the pixel
+          won&rsquo;t load. Our site doesn&rsquo;t otherwise respond to &ldquo;Do Not Track&rdquo;
+          signals, because there&rsquo;s no common standard for them. You can also manage how Meta uses
+          information for ads in your Facebook or Instagram ad settings.
         </p>
       </Section>
 

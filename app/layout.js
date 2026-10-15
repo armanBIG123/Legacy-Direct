@@ -12,6 +12,9 @@ export const metadata = {
     'See your life insurance options for legacy, income protection and retirement, then talk it through with a licensed agent.',
 };
 
+import MetaPixel from '@/components/tracking/MetaPixel';
+import ConsentBanner from '@/components/tracking/ConsentBanner';
+
 // The marketing header and footer live on the homepage itself, so the
 // /apply flow gets a focused, distraction-free screen with its own header.
 export default function RootLayout({ children }) {
@@ -22,7 +25,12 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="stylesheet" href={FONTS_URL} />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {/* Meta Pixel loads only after the visitor allows it in the banner. */}
+        <MetaPixel />
+        <ConsentBanner />
+      </body>
     </html>
   );
 }
