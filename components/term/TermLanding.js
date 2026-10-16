@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import TermHeader from './TermHeader';
 import CallButton from './CallButton';
+import TermQuiz, { NEED_EVENT } from './TermQuiz';
 import { NEEDS, INCOME_MULTIPLE } from './termConfig';
 import { captureAttribution } from './attribution';
 import { trackEvent } from './track';
-import { SAVE_NOTICE } from './disclosures';
+import { CALL_NOTICE } from './disclosures';
 import { agencySentence, LegalLinks } from '../legal/AgencyLine';
 import { GENERAL_DISCLOSURE, TERM_DISCLOSURE, LIVING_BENEFITS_DISCLOSURE, COMPENSATION_DISCLOSURE } from '../legal/disclosures';
 
@@ -36,7 +37,7 @@ const ICONS = {
 };
 
 const HOW = [
-  { t: 'Tap what you want to protect', b: 'Add a few details, then answer 3 quick questions — about two minutes.' },
+  { t: 'Tell us who it’s for', b: 'Name, email and ZIP — then a few quick taps. About two minutes.' },
   { t: 'See your starting coverage', b: `Sized to your income (${INCOME_MULTIPLE}×) or your mortgage balance.` },
   { t: 'Finish with a real, licensed agent', b: 'Start online, then an agent compares insurers and gets you exact prices. No obligation.' },
 ];
@@ -61,9 +62,18 @@ const FAQ = [
 ];
 
 export default function TermLanding() {
+  // The header's Call button is always on screen, so on phones the bottom
+  // call bar stays out of the way while the form is visible and slides in
+  // once the visitor scrolls past it.
+  const [quizInView, setQuizInView] = useState(true);
   useEffect(() => {
     captureAttribution();
     trackEvent('term_view');
+    const el = document.getElementById('get-started');
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([entry]) => setQuizInView(entry.isIntersecting), { threshold: 0.15 });
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   return (
@@ -71,39 +81,31 @@ export default function TermLanding() {
       <TermHeader />
 
       <section className="term-hero">
-        <div className="term-hero-inner">
-          <div className="eyebrow on-ink">Term life coverage</div>
-          <h1>
-            Protect your paycheck, your family and your home — <em>see your coverage in 2 minutes.</em>
-          </h1>
-          <p className="term-hero-lede">No exam to get started. No Social Security number. Real people, licensed agents.</p>
-
-          <div className="term-hero-pick">
-            <div className="term-hero-q">What do you want to protect?</div>
-            <div className="term-hero-cards">
+        <div className="term-hero-inner term-hero-split">
+          <div className="term-hero-copy">
+            <div className="eyebrow on-ink">Term life coverage</div>
+            <h1>
+              Protect your paycheck, your family and your home — <em>see your coverage in 2 minutes.</em>
+            </h1>
+            <p className="term-hero-lede">No exam to get started. No Social Security number. Real people, licensed agents.</p>
+            <ul className="term-hero-points">
               {Object.values(NEEDS).map((n) => (
-                <Link
-                  key={n.key}
-                  href={`/term/apply?need=${n.key}`}
-                  className="term-hero-card"
-                  onClick={() => trackEvent('term_start', { need: n.key, from: 'hero' })}
-                >
-                  <span className="term-hero-card-icon">{ICONS[n.key]}</span>
-                  <span className="term-hero-card-text">
-                    <span className="term-hero-card-title">{n.title}</span>
-                    <span className="term-hero-card-tag">{n.tag}</span>
+                <li key={n.key}>
+                  <span className="term-hero-point-icon">{ICONS[n.key]}</span>
+                  <span>
+                    <strong>{n.title}</strong> — {n.tag.toLowerCase()}
                   </span>
-                  <span className="term-hero-card-arrow" aria-hidden="true">→</span>
-                </Link>
+                </li>
               ))}
-            </div>
-            <p className="term-hero-notice">
-              {SAVE_NOTICE} <a href="/data-use#term">How we use your information</a>
-            </p>
+            </ul>
             <div className="term-hero-alt">
               <span>Prefer to talk?</span>
-              <CallButton variant="ghost" onCall={() => trackEvent('term_call', { step: 'landing_hero' })} />
+              <CallButton variant="ghost" where="landing_hero" />
+              <p className="term-hero-callnote">{CALL_NOTICE}</p>
             </div>
+          </div>
+          <div className="term-hero-quiz">
+            <TermQuiz embedded />
           </div>
         </div>
       </section>
@@ -121,9 +123,9 @@ export default function TermLanding() {
               10 to 12 times more than it actually does. Cost is the #1 reason people put this off — so
               see your real number before you decide.
             </p>
-            <Link href="/term/apply" className="btn btn-brass" onClick={() => trackEvent('term_start', { from: 'myth' })}>
+            <a href="#get-started" className="btn btn-brass" onClick={() => trackEvent('term_start', { from: 'myth' })}>
               See my coverage →
-            </Link>
+            </a>
             <p className="term-myth-source">Source: LIMRA &amp; Life Happens, 2025 Insurance Barometer Study.</p>
           </div>
         </div>
@@ -134,14 +136,17 @@ export default function TermLanding() {
           <h2>Three ways term coverage protects you</h2>
           <div className="term-need-grid">
             {Object.values(NEEDS).map((n) => (
-              <Link key={n.key} href={`/term/apply?need=${n.key}`} className="term-need-card"
-                onClick={() => trackEvent('term_start', { need: n.key, from: 'cards' })}>
+              <a key={n.key} href="#get-started" className="term-need-card"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.dispatchEvent(new CustomEvent(NEED_EVENT, { detail: { need: n.key } }));
+                }}>
                 <span className="term-need-icon">{ICONS[n.key]}</span>
                 <span className="term-need-tag">{n.tag}</span>
                 <span className="term-need-title">{n.title}</span>
                 <span className="term-need-body">{n.body}</span>
                 <span className="term-need-cta">See my coverage →</span>
-              </Link>
+              </a>
             ))}
           </div>
         </div>
@@ -183,10 +188,10 @@ export default function TermLanding() {
             <p>Two minutes online, or talk to a licensed agent now.</p>
           </div>
           <div className="term-talk-ctas">
-            <Link href="/term/apply" className="btn btn-brass" onClick={() => trackEvent('term_start', { from: 'footer_cta' })}>
+            <a href="#get-started" className="btn btn-brass" onClick={() => trackEvent('term_start', { from: 'footer_cta' })}>
               See my coverage →
-            </Link>
-            <CallButton variant="solid" onCall={() => trackEvent('term_call', { step: 'landing_footer' })} />
+            </a>
+            <CallButton variant="solid" where="landing_footer" />
           </div>
         </div>
       </section>
@@ -206,8 +211,8 @@ export default function TermLanding() {
         </div>
       </footer>
 
-      <div className="term-callbar">
-        <CallButton variant="solid" label="Call for live help" onCall={() => trackEvent('term_call', { step: 'landing_bar' })} />
+      <div className={`term-callbar ${quizInView ? 'is-tucked' : ''}`}>
+        <CallButton variant="solid" label="Call for live help" where="landing_bar" />
       </div>
     </div>
   );

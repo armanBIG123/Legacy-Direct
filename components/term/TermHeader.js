@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import CallButton from './CallButton';
 
-export default function TermHeader({ onCall, homeHref = '/term' }) {
+export default function TermHeader({ homeHref = "/term" }) {
   return (
     <header className="term-header">
       <div className="term-header-inner">
@@ -21,7 +21,7 @@ export default function TermHeader({ onCall, homeHref = '/term' }) {
         </Link>
         <div className="term-header-call">
           <span className="term-header-help">Questions? A licensed agent can help.</span>
-          <CallButton onCall={onCall} variant="solid" label="Call now" />
+          <CallButton variant="solid" label="Call now" where="header" />
         </div>
       </div>
     </header>

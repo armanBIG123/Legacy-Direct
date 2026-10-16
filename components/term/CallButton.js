@@ -3,6 +3,11 @@
 import { AGENT_PHONE_DISPLAY, AGENT_PHONE_TEL } from './termConfig';
 import { trackEvent } from './track';
 
+// Every Call button announces the tap with this event. If a term quiz is on
+// the page it saves what the visitor has entered (and records the tap);
+// otherwise the button records the tap itself. Never blocks the call.
+export const CALL_EVENT = 'ld-term-call';
+
 const PhoneIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <path
@@ -14,16 +19,17 @@ const PhoneIcon = () => (
   </svg>
 );
 
-// A real tel: link (works on every phone). onCall runs first so the flow can
-// save whatever the visitor has entered — it never blocks the call.
-export default function CallButton({ onCall, variant = 'solid', label = 'Call for live help', showNumber = true }) {
+export default function CallButton({ variant = 'solid', label = 'Call for live help', showNumber = true, where = 'page' }) {
   return (
     <a
       href={`tel:${AGENT_PHONE_TEL}`}
       className={`term-call term-call-${variant}`}
       onClick={() => {
-        if (onCall) onCall();
-        else trackEvent('term_call', { step: 'header' });
+        const detail = { where, handled: false };
+        try {
+          window.dispatchEvent(new CustomEvent(CALL_EVENT, { detail }));
+        } catch {}
+        if (!detail.handled) trackEvent('term_call', { step: where });
       }}
     >
       <PhoneIcon />

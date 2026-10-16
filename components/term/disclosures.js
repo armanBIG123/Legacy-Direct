@@ -2,7 +2,7 @@
 // compliance can review one file. When any wording changes, bump
 // DISCLOSURE_VERSION — it's saved with each lead as proof of exactly what
 // the person was shown.
-export const DISCLOSURE_VERSION = 'term-2026-10-13.2';
+export const DISCLOSURE_VERSION = 'term-2026-10-16';
 
 // Shown before they start answering (landing hero + first question).
 export const SAVE_NOTICE =
@@ -13,6 +13,11 @@ export const CONTACT_NOTICE =
   'What you type here is saved as you enter it, even if you don’t tap the button. A licensed LegacyDirect agent may contact you at the email or phone number you provide about this coverage request.';
 
 // Shown next to Call buttons inside the quiz.
+// First screen of the term quiz: one sentence covering both points above —
+// answers are saved before they finish, and an agent may contact them.
+export const START_NOTICE =
+  'What you enter is saved as you go — even if you don’t finish or tap the button — and a licensed LegacyDirect agent may contact you at the email or phone number you provide about this coverage request.';
+
 export const CALL_NOTICE =
   'When you call, the licensed agent who answers can see the answers you’ve already given, so you don’t have to repeat them.';
 
