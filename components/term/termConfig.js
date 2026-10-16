@@ -1,7 +1,7 @@
 // Term coverage settings. Change the phone number here and every Call
 // button on the term pages updates.
-export const AGENT_PHONE_DISPLAY = '(000) 000-0000';
-export const AGENT_PHONE_TEL = '+10000000000'; // digits only, with +1
+export const AGENT_PHONE_DISPLAY = '(707) 347-9284';
+export const AGENT_PHONE_TEL = '+17073479284'; // digits only, with +1
 
 export const phoneConfigured = !AGENT_PHONE_TEL.startsWith('+1000');
 
